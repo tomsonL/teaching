@@ -1,0 +1,827 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0014)about:internet -->
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"> 
+    <!-- 
+    Smart developers always View Source. 
+    
+    This application was built using Adobe Flex, an open source framework
+    for building rich Internet applications that get delivered via the
+    Flash Player or to desktops via Adobe AIR. 
+    
+    Learn more about Flex at http://flex.org 
+    // -->
+    <head>
+        <title></title>
+        <meta name="google" value="notranslate" />         
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <!-- Include CSS to eliminate any default margins/padding and set the height of the html element and 
+             the body element to 100%, because Firefox, or any Gecko based browser, interprets percentage as 
+             the percentage of the height of its parent container, which has to be set explicitly.  Fix for
+             Firefox 3.6 focus border issues.  Initially, don't display flashContent div so it won't show 
+             if JavaScript disabled.
+        -->
+        <style type="text/css" media="screen"> 
+            html, body  { height:100%; }
+            body { margin:0; padding:0; overflow:auto; text-align:center; 
+                   background-color: #869ca7; }   
+            object:focus { outline:none; }
+        </style>
+		
+		<script type="text/javascript">
+		
+			<!-- movieName:Flash模块的id -->
+			function thisMovie(movieName){
+                var isIE = navigator.appName.indexOf("Microsoft") != -1;
+                return (isIE) ? window[movieName] : document[movieName];    
+            }
+			
+			function thisElement(id)
+			{
+				return document.getElementById(id);
+			}
+
+			var SWFMODULECOUNT = 3;//需要加载的swf总模块数(一个白板模块和两个视频模块)
+			var m_curLoadedModuleCount = 0;//当前已经加载的swf模块数
+			var USERTYPE_STU = 0;//用户类型：学生
+			var USERTYPE_TEC = 1;//用户类型：教师
+
+			var m_webServerIP = "www.weiyicloud.com";
+			var m_webServerPort = "80";
+			var m_meetingID = "204390934";
+		
+			var fileList = new Array();//会议中的文件列表
+			var userList = new Array();//会议中的用户列表
+			var m_localUserInfo;//本地用户(自己)信息
+			var m_peerID;//本地用户(自己)的ID，此ID由服务器分配，接口中所有使用的用户ID均为服务器分配的用户ID
+			var m_userName;//本地用户(自己)用户名
+			var m_userType;//本地用户(自己)用户类型。0：学生、1：教师
+			var m_hasAudio;//本地用户是否有音频设备
+			var m_hasVideo;//本地用户是否有视频设备
+			var m_mediaServerIP;
+			var m_mediaServerTcpPort;
+			var m_mediaServerUdpPort;
+			
+			var m_micList = new Array();//麦克风列表
+			var m_camList = new Array();//摄像头列表
+			var m_curMicIndex;//当前麦克风索引
+			var m_curMicName;//当前麦克风名字
+			var m_curCamIndex;//当前摄像头索引
+			var m_curCamName;//当前摄像头名字
+			var m_curCamWidth;//当前摄像头分辨率---宽
+			var m_curCamHeight;//当前摄像头分辨率---高
+			
+			<!----------------------------------------------------------------------------------------------------------------------------->
+			<!-- 白板模块和视频模块的回调函数名相同，故回调处理统一在此完成 -->
+			<!----------------------------------------------------------------------------------------------------------------------------->
+			var OnFlashInvoke = function()
+			{
+				var cbkFuncName = arguments[0];
+				switch (cbkFuncName)
+				{
+					<!-- 以下为白板模块的回调 -->
+					case "OnGetMeetingFileReply":
+						if(arguments[1].result == 0)
+						{
+							fileList = arguments[1].meetingfile;
+							fileList.push(arguments[1].whiteboard);
+							var sel = thisElement('sel');
+							for(var index=0; index < fileList.length; index++)
+							{
+								var optionItem = document.createElement("OPTION");
+								optionItem.value=index;
+								optionItem.text= fileList[index].filename;//fileList中的每个文集都有filename、fileid字段
+								sel.options.add(optionItem);
+							}
+						}
+						else
+						{
+							printlog("No files in meeting");
+						}
+						break;
+					
+					case "OnNetConnectionReply":
+						onNetConnectionReply(arguments[1]);
+						break;
+					
+					case "OnEnablePresence":
+						m_localUserInfo = arguments[1];
+						m_peerID = m_localUserInfo.peerID;
+						m_userName = m_localUserInfo.userName;
+						m_userType = m_localUserInfo.userType;
+						m_hasAudio = m_localUserInfo.hasAudio;
+						m_hasVideo = m_localUserInfo.hasVideo;
+
+						printlog("My id: "+m_peerID+" ,my name: "+m_userName+" ,my type: "+m_userType);
+
+						var usel = thisElement('usersel');
+						var oItem = document.createElement("OPTION");
+						oItem.value = m_peerID;
+						oItem.text = "my self";
+						usel.options.add(oItem);
+						break;
+						
+					case "OnWBModulePrepareComplete":
+						m_curLoadedModuleCount ++;
+						
+						m_mediaServerIP = arguments[1];
+						m_mediaServerTcpPort = arguments[2];
+						m_mediaServerUdpPort = arguments[3];
+						
+						thisMovie("MicroLanguage_WB").Flash_SetWBPenColor(0xff0000);
+						thisMovie("MicroLanguage_WB").Flash_SetWBPenThickness(5);
+						thisMovie("MicroLanguage_WB").Flash_SetWBPenAlpha(1);
+						thisMovie("MicroLanguage_WB").Flash_SetWBRectColor(0x00ff00);
+						thisMovie("MicroLanguage_WB").Flash_SetWBRectThickness(5);
+						thisMovie("MicroLanguage_WB").Flash_SetWBRectAlpha(1);
+						thisMovie("MicroLanguage_WB").Flash_SetWBTextColor(0x0000ff);
+						thisMovie("MicroLanguage_WB").Flash_SetWBTextFont("微软雅黑");
+						thisMovie("MicroLanguage_WB").Flash_SetWBTextSize(12);
+						
+						initial();
+
+						break;
+					
+					case "OnUserIn":
+						userList.push(arguments[1]);
+						// alert("****** User In ******\r\n"+
+						// "user name: "+arguments[1].userName+"\r\n"+
+						// "user id: "+arguments[1].peerID+"\r\n"+
+						// "user type: "+arguments[1].userType);
+						
+						printlog("****** User In ****** user name: "+arguments[1].userName+"user id: "+arguments[1].peerID);
+
+						var usersel = thisElement('usersel');
+						var optionItem = document.createElement("OPTION");
+						optionItem.value = arguments[1].peerID;
+						optionItem.text = arguments[1].userName;
+						usersel.options.add(optionItem);	
+
+						break;
+					
+					case "OnUserOut":
+						var outUserID = arguments[1];
+						var outUserName;
+						for(var i=0;i<userList.length;i++)
+						{
+							if(userList[i].peerID == outUserID)
+							{
+								outUserName = userList[i].userName;
+								userList.splice(i,1);
+								break;
+							}
+						}
+
+						var usersel = thisElement('usersel');
+						for (var i = usersel.options.length - 1; i >= 0; i--) {
+							if(usersel.options[i].value == outUserID)
+							{
+								usersel.options.remove(i);
+								break;
+							}
+						};
+
+						printlog("****** User Out ****** user name: "+outUserName+"user id: "+outUserID);
+						
+						break;
+						
+					case "OnShowPage":
+						var showingFileID = arguments[1];
+						var showingPageID = arguments[2];
+						for(var i=0;i<fileList.length;i++)
+						{
+							if(fileList[i].fileid == showingFileID)
+							{
+								thisElement('sel').options[i].selected = true;
+								break;
+							}
+						}
+						break;
+						
+					case "OnReceiveTextMsg":
+						var fromID = arguments[1];
+						var msgBody = arguments[2];
+						var fromName;
+						for(var i=0;i<userList.length;i++)
+						{
+							if(userList[i].peerID == fromID)
+							{
+								fromName = userList[i].userName;
+								break;
+							}
+						}
+						printlog("message from: "+fromName+" .message content: "+msgBody);
+						break;
+					
+					<!-- 以下为视频模块的回调 -->
+					case "OnVideoModulePrepareComplete":
+						m_curLoadedModuleCount ++;
+						
+						initial();
+
+						break;
+						
+					case "OnCamChanged":
+						var camOpened = arguments[1];
+						if(camOpened == true)
+						{
+							printlog("Camera was opened");
+						}
+						else if(camOpened == false)
+						{
+							printlog("Camera was closed");
+						}
+						break;
+						
+					case "OnMicChanged":
+						var micOpend = arguments[1];
+						if(micOpend == true)
+						{
+						    publisAudio();
+							printlog("Microphone was opened");
+						}
+						else if(micOpend == false)
+						{
+						    unpublisAudio();
+							printlog("Microphone was muted");
+						}
+						break;
+					
+					case "OnUpNetState":
+						var upSta = arguments[1];
+						if(upSta == 0)
+						{
+							console.log("Uplink network good");
+						}
+						else if(upSta == 1)
+						{
+							console.log("Uplink network bad");
+						}
+						break;
+						
+					case "OnDownNetState":
+						var downSta = arguments[1];
+						if(downSta == 0)
+						{
+							console.log("Downlink network good");
+						}
+						else if(downSta == 1)
+						{
+							console.log("Downlink network bad");
+						}
+						break;
+						
+					case "OnDetecAudioDevReply":
+						var aDev = arguments[1];
+						if(aDev == 0)
+						{
+							console.log("Normal audio device");
+						}
+						else if(aDev == -1)
+						{
+							console.log("No audio device");
+						}
+						else if(aDev == -2)
+						{
+							console.log("Audio device disabled");
+						}
+						break;
+					
+					case "OnDetectVideoDevReply":
+						var vDev = arguments[1];
+						if(vDev == 0)
+						{
+							console.log("Normal video device");
+						}
+						else if(vDev == -1)
+						{
+							console.log("No video device");
+						}
+						else if(vDev == -2)
+						{
+							console.log("Video device disabled");
+						}
+						break;
+					
+					case "OnDetectNetStateReply":
+						var netSta = arguments[1];
+						if(netSta == 0)
+						{
+							console.log("Network good");
+						}
+						else if(netSta == 1)
+						{
+							console.log("Network bad");
+						}
+						break;
+						
+					case "OnGetMicListReply":
+						m_micList = arguments[1];
+						m_curMicIndex = arguments[2];
+						m_curMicName = arguments[3];
+						
+						var micsel = thisElement('micsel');
+						for(var index=0; index < m_micList.length; index++)
+						{
+							var optionItem = document.createElement("OPTION");
+							optionItem.value=index;
+							optionItem.text= m_micList[index];
+							micsel.options.add(optionItem);
+						}
+						
+						if(m_curMicIndex < m_micList.length)
+						{
+							micsel.options[m_curMicIndex].selected = true;
+						}
+						break;
+						
+					case "OnGetCamListReply":
+						m_camList = arguments[1];
+						m_curCamIndex = arguments[2];
+						m_curCamName = arguments[3];
+						m_curCamWidth = arguments[4];
+						m_curCamHeight = arguments[5];
+						
+						var camsel = thisElement('camsel');
+						for(var index=0; index < m_camList.length; index++)
+						{
+							var optionItem = document.createElement("OPTION");
+							optionItem.value=index;
+							optionItem.text= m_camList[index];
+							camsel.options.add(optionItem);
+						}
+						
+						if(m_curCamIndex < m_camList.length)
+						{
+							camsel.options[m_curCamIndex].selected = true;
+						}
+						break;
+						
+					case "OnUpVideoBWReply":
+						//发布自己的视频后(即调用Flash_PublishVideo)会收到此回调，每3秒收一次。单位:kbps
+						console.log("up bandwidth: "+arguments[1]+"kbps");
+						break;
+						
+					case "OnDownVideoBWReply":
+						//播放别人的视频后(即调用Flash_PlayVideo接口)会收到此回调，每3秒收一次。单位:kbps
+						console.log("user id: "+arguments[1]+"  video id："+arguments[2]+"  down bandwidth: "+arguments[3]+"kbps");
+						break;
+					
+					case "OnDevStatusChange":
+						var mutedStatus = arguments[1];
+						if(mutedStatus == -1)
+						{
+							console.log("audio&video device were muted");//点击了拒绝
+						}
+						else if(mutedStatus == 0)
+						{
+							console.log("audio&video device were unmuted");//点击了允许
+						}
+						break;
+
+					case "OnMicLoopBackVolReply":
+						thisElement("volwatcher").value = arguments[1];
+						break;
+
+					default:
+						break;
+				}
+            }
+			
+			function onFileChange(value)
+			{
+				var fileID = fileList[value].fileid;//文档ID
+				var pageNum = fileList[value].pagenum;//文档总页数。注：白板无此字段
+				thisMovie("MicroLanguage_WB").Flash_ShowFile(fileID,1);
+			}
+
+			function onUserChange(value)
+			{
+			}
+			
+			function playVideo()
+			{
+				<!-- 调用从视频模块中的播放视频方法，在从视频模块中播放指定用户的视频 -->
+				thisMovie("video_slave").Flash_PlayVideo(parseInt(thisElement("usersel").value),0);
+			}
+			
+			function unplayVideo()
+			{
+				<!-- 调用从视频模块中的停止播放视频方法，停止从视频模块中正在播放的视频 -->
+				thisMovie("video_slave").Flash_UnplayVideo(parseInt(thisElement("usersel").value),0);
+			}
+			
+			function playAudio()
+			{
+				<!-- 调用主视频模块中的播放音频方法，通过主视频模块播放指定用户的音频 -->
+				thisMovie("video_main").Flash_PlayAudio(parseInt(thisElement("usersel").value));
+			}
+			
+			function unplayAudio()
+			{
+				<!-- 调用主视频模块中的停止播放音频方法，停止在主视频模块中正在播放的音频 -->
+				thisMovie("video_main").Flash_UnplayAudio(parseInt(thisElement("usersel").value));
+			}
+			
+			function publisAudio()
+			{
+				<!-- 调用主视频模块中的发布音频方法，通过主视频模块发布自己的音频 --
+				thisMovie("video_main").Flash_PublishAudio();
+			}
+			
+			function unpublisAudio()
+			{
+				<!-- 调用主视频模块中的停止发布音频方法，通过主视频模块停止发布自己的音频 -->
+				thisMovie("video_main").Flash_UnpublishAudio();
+			}
+			
+			function publisVideo()
+			{
+				<!-- 调用主视频模块中的发布视频方法，通过主视频模块发布自己的视频 -->
+				thisMovie("video_main").Flash_PublishVideo(0);
+			}
+			
+			function unpublisVideo()
+			{
+				<!-- 调用主视频模块中的停止发布视频方法，通过主视频模块停止发布自己的视频 -->
+				thisMovie("video_main").Flash_UnpublishVideo(0);
+			}
+			
+			function sendTextMsg()
+			{
+				<!-- 调用白板模块中的发送文本消息方法，向会议中其他用户发送文本消息 -->
+				thisMovie("MicroLanguage_WB").Flash_SendTextMsg("hello world",0);
+			}
+			
+			function setFocusUser()
+			{
+				<!-- 调用白板模块中的设置焦点用户的方法，设置录制焦点 -->
+				thisMovie("MicroLanguage_WB").Flash_SetFocusUser(parseInt(thisElement("usersel").value));
+			}
+			
+			function removeFocusUser()
+			{
+				<!-- 调用白板模块中的移除焦点用户的方法，移除录制焦点 -->
+				thisMovie("MicroLanguage_WB").Flash_RemoveFocusUser(parseInt(thisElement("usersel").value));
+			}
+			
+			function startRecord()
+			{
+				<!-- 调用白板模块中的开始录制方法，录制会议音视频 -->
+				thisMovie("MicroLanguage_WB").Flash_StartRecord();
+			}
+			
+			function stopRecord()
+			{
+				<!-- 调用白板模块中的停止录制方法，停止录制会议音视频 -->
+				thisMovie("MicroLanguage_WB").Flash_StopRecord();
+			}
+			
+			function detAudioDev()
+			{
+				<!-- 调用主视频模块中的检测音频设备方法，检测音频设备状态 -->
+				thisMovie("video_main").Flash_DetectAudioDevice();
+			}
+			
+			function detVideoDev()
+			{
+				<!-- 调用主视频模块中的检测视频设备方法，检测视频设备状态 -->
+				thisMovie("video_main").Flash_DetectVideoDevice();
+			}
+			
+			function detNetState()
+			{
+				<!-- 调用主视频模块中的检测网络状态方法，检测网络状态 -->
+				thisMovie("video_main").Flash_DetectNetState();
+			}
+			
+			function onNetConnectionReply(status)
+			{
+				switch(status)
+				{
+					case "Success":
+						<!-- 成功连接到服务器 -->
+						//alert("Connect server success");
+						break;
+					case "Failed":
+						<!-- 无法连接到服务器 -->
+						alert("Connect server failed");
+						break;
+					case "Rejected":
+						<!-- 连接服务器被拒绝，一般是点数超限造成 -->
+						alert("Connect server rejected");
+						break;
+					case "Closed":
+						<!-- 与服务器的连接中断 -->
+						alert("Server connection closed");
+						break;
+					default :
+						break;
+				}
+			}
+			
+			function initial()
+			{
+				if(m_curLoadedModuleCount < SWFMODULECOUNT) return;//通过此方式确保initial函数只执行一次
+				printlog("initialize complete...");
+
+				<!-- Flash_SetSelfProperty是视频模块的接口，而m_localUserInfo由白板模块得到，故要等到白板模块和视频模块都准备完成才可调用此接口 -->
+				<!-- 一定要在调用任何Flash接口前调用Flash_SetSelfProperty接口，为主、从视频模块设置属性 -->
+
+				thisMovie("video_main").Flash_SetConnectionInfo(m_mediaServerIP,m_mediaServerTcpPort,m_mediaServerUdpPort);
+				thisMovie("video_main").Flash_SetSelfProperty(m_localUserInfo);
+				
+				thisMovie("video_slave").Flash_SetConnectionInfo(m_mediaServerIP,m_mediaServerTcpPort,m_mediaServerUdpPort);
+				thisMovie("video_slave").Flash_SetSelfProperty(m_localUserInfo);
+
+				thisMovie("video_main").Flash_PlayVideo(m_peerID,0);
+				
+				publisAudio();
+				publisVideo();
+				getAVDevList();
+				
+				<!-- 启用各按钮，以为着此时允许调用接口 -->
+				thisElement("playvideo").disabled = false;
+				thisElement("unplayvideo").disabled = false;
+				thisElement("playaudio").disabled = false;
+				thisElement("unplayaudio").disabled = false;
+				thisElement("publishaudio").disabled = false;
+				thisElement("unpublishaudio").disabled = false;
+				thisElement("publishvideo").disabled = false;
+				thisElement("unpublishvideo").disabled = false;
+				thisElement("sendtextmsg").disabled = false;
+				thisElement("setfocus").disabled = false;
+				thisElement("removefocus").disabled = false;
+				thisElement("startrecord").disabled = false;
+				thisElement("stoprecord").disabled = false;
+				thisElement("detaudiodev").disabled = false;
+				thisElement("detvideodev").disabled = false;
+				thisElement("detnetstate").disabled = false;
+				thisElement("zoomout").disabled = false;
+				thisElement("zoomin").disabled = false;
+				thisElement("startmictest").disabled = false;
+				thisElement("stopmictest").disabled = false;
+			}
+			
+			<!-- 获取音视频设备列表 -->
+			<!-- 注：Flash没有获取扬声器的能力 -->
+			function getAVDevList()
+			{
+				//获取麦克风列表，通过OnGetMicListReply回调返回麦克风信息
+				thisMovie("video_main").Flash_GetMicList();
+				//获取摄像头列表，通过OnGetCamListReply回调返回摄像头信息
+				thisMovie("video_main").Flash_GetCamList();
+			}
+			
+			function onMicChange(value)
+			{
+				//Flash_SetMicrophone(index)
+				//index:麦克风索引
+				thisMovie("video_main").Flash_SetMicrophone(value);
+				m_curCamIndex = value;
+			}
+			
+			function onCamChange(value)
+			{
+				//Flash_SetCamera(index,wid,hei)
+				//index:摄像头索引
+				//wid:分辨率宽
+				//hei:分辨率高
+				thisMovie("video_main").Flash_SetCamera(value,m_curCamWidth,m_curCamHeight);
+				m_curCamIndex = value;
+			}
+			
+			function zoomOut()
+			{
+				thisMovie("video_main").width = 640;
+				thisMovie("video_main").height = 480;
+			}
+			
+			function zoomIn()
+			{
+				thisMovie("video_main").width = 320;
+				thisMovie("video_main").height = 240;
+			}
+
+			var lineNum = 0;
+			function printlog(log)
+			{
+				++lineNum;
+				thisElement("logconsole").value = thisElement("logconsole").value + lineNum + ". " + log + "\r\n";
+			}
+
+			var micIndex = 0;
+			var micTesting = false;
+			function startMicTest()
+			{
+				micIndex = thisElement("micsel").selectedIndex;
+				thisMovie("video_main").Flash_StartMicLoopBack(micIndex);
+				micTesting = true;
+			}
+
+			function stopMicTest()
+			{
+				thisMovie("video_main").Flash_StopMicLoopBack(micIndex);	
+			}
+				
+        </script>
+        
+        <!-- Enable Browser History by replacing useBrowserHistory tokens with two hyphens -->
+        <!-- BEGIN Browser History required section -->
+        <link rel="stylesheet" type="text/css" href="history/history.css" />
+        <script type="text/javascript" src="history/history.js"></script>
+        <!-- END Browser History required section -->  
+            
+        <script type="text/javascript" src="swfobject.js"></script>
+		<!----------------------------------------------------------------------------------------------------------------------------->
+		<!-- 加载白板模块 -->
+		<!----------------------------------------------------------------------------------------------------------------------------->
+        <script type="text/javascript">
+            // For version detection, set to min. required Flash Player version, or 0 (or 0.0.0), for no version detection. 
+            var swfVersionStr = "11.1.0";
+            // To use express install, set to playerProductInstall.swf, otherwise the empty string. 
+            var xiSwfUrlStr = "playerProductInstall.swf";
+			<!----------------------------------------------------------------------------------------------------------------------------->
+			<!-- ip:web服务器ip -->
+			<!-- port:web服务器端口 -->
+			<!-- mid:会议号 -->
+			<!-- uname:用户名 -->
+			<!-- pwd:会议密码 -->
+			<!-- utype:用户类型。0：学生、1：教师 -->
+			<!----------------------------------------------------------------------------------------------------------------------------->
+            var flashvars = {ip:m_webServerIP,port:m_webServerPort,mid:m_meetingID,uname:"teacher",pwd:"2222",utype:1};
+            var params = {};
+            params.quality = "high";
+            params.bgcolor = "#869ca7";
+            params.allowscriptaccess = "sameDomain";
+            params.allowfullscreen = "true";
+            var attributes = {};
+            attributes.id = "MicroLanguage_WB";
+            attributes.name = "MicroLanguage_WB";
+            attributes.align = "left";
+            swfobject.embedSWF(
+                "MicroLanguage_WB.swf", "whiteboard", 
+                "600", "480", 
+                swfVersionStr, xiSwfUrlStr, 
+                flashvars, params, attributes);
+            // JavaScript enabled so display the flashContent div in case it is not replaced with a swf object.
+            swfobject.createCSS("#whiteboard", "display:block;text-align:left;");
+        </script>
+		
+		<!----------------------------------------------------------------------------------------------------------------------------->
+		<!-- 加载主视频模块，发布、播放自己的音视频，及播放其他人的音频，均调用此模块中的接口完成 -->
+		<!----------------------------------------------------------------------------------------------------------------------------->
+		<script type="text/javascript">
+            // For version detection, set to min. required Flash Player version, or 0 (or 0.0.0), for no version detection. 
+            var swfVersionStr = "11.1.0";
+            // To use express install, set to playerProductInstall.swf, otherwise the empty string. 
+            var xiSwfUrlStr = "playerProductInstall.swf";
+			<!----------------------------------------------------------------------------------------------------------------------------->
+			<!-- mid:会议号 -->
+			<!-- toolbarinvisible：不显示工具条。0：显示、1：不显示。主视频模块可选择显示，从视频模块可选择不显示 -->
+			<!-- uncollectav:不采集音视频。即是否弹出Adobe Flash Player的允许决绝对话框。若不弹出此对话框，则无法使用音视频设备采集音视频，但可以播放音视频 -->
+			<!-- 从视频模块可选择不弹出此对话框，因为从视频模块一般只用来播放视频。0：采集(弹出对话框)、1:不采集(不弹出对话框) -->
+			<!----------------------------------------------------------------------------------------------------------------------------->
+            var flashvars = {ip:m_webServerIP,port:m_webServerPort,mid:m_meetingID,toolbarinvisible:0,uncollectav:0};
+            var params = {};
+            params.quality = "high";
+            params.bgcolor = "#869ca7";
+            params.allowscriptaccess = "sameDomain";
+            params.allowfullscreen = "true";
+            var attributes = {};
+            attributes.id = "video_main";
+            attributes.name = "video_main";
+            attributes.align = "middle";
+            swfobject.embedSWF(
+                "MicroLanguage_Video.swf", "video_main", 
+                "320", "240", 
+                swfVersionStr, xiSwfUrlStr, 
+                flashvars, params, attributes);
+            // JavaScript enabled so display the flashContent div in case it is not replaced with a swf object.
+            swfobject.createCSS("#video_main", "display:block;text-align:left;");
+        </script>
+		
+		<!----------------------------------------------------------------------------------------------------------------------------->
+		<!-- 加载从视频模块，只用来显示其他人视频，故只调用此模块中的开始播放视频和停止播放视频接口 -->
+		<!----------------------------------------------------------------------------------------------------------------------------->
+		<script type="text/javascript">
+            // For version detection, set to min. required Flash Player version, or 0 (or 0.0.0), for no version detection. 
+            var swfVersionStr = "11.1.0";
+            // To use express install, set to playerProductInstall.swf, otherwise the empty string. 
+            var xiSwfUrlStr = "playerProductInstall.swf";
+			<!----------------------------------------------------------------------------------------------------------------------------->
+			<!-- mid:会议号 -->
+			<!-- toolbarinvisible：不显示工具条。0：显示、1：不显示。主视频模块可选择显示，从视频模块可选择不显示 -->
+			<!-- uncollectav:不采集音视频。即是否弹出Adobe Flash Player的允许决绝对话框。若不弹出此对话框，则无法使用音视频设备采集音视频，但可以播放音视频 -->
+			<!-- 从视频模块可选择不弹出此对话框，因为从视频模块一般只用来播放视频。0：采集(弹出对话框)、1:不采集(不弹出对话框) -->
+			<!----------------------------------------------------------------------------------------------------------------------------->
+            var flashvars = {ip:m_webServerIP,port:m_webServerPort,mid:m_meetingID,toolbarinvisible:1,uncollectav:1};
+            var params = {};
+            params.quality = "high";
+            params.bgcolor = "#869ca7";
+            params.allowscriptaccess = "sameDomain";
+            params.allowfullscreen = "true";
+            var attributes = {};
+            attributes.id = "video_slave";
+            attributes.name = "video_slave";
+            attributes.align = "middle";
+            swfobject.embedSWF(
+                "MicroLanguage_Video.swf", "video_slave", 
+                "320", "240", 
+                swfVersionStr, xiSwfUrlStr, 
+                flashvars, params, attributes);
+            // JavaScript enabled so display the flashContent div in case it is not replaced with a swf object.
+            swfobject.createCSS("#video_slave", "display:block;text-align:left;");
+        </script>
+		
+    </head>
+    <body>
+
+		<textarea style="width:80%;height:60px;" id="logconsole"></textarea>
+
+		</br>
+
+		<select id="usersel" style="width:150px;" onchange="onUserChange(this.value);"></select>
+		<select id="sel" style="width:150px;" onchange="onFileChange(this.value);"></select>
+		<select id="micsel" style="width:150px;" onchange="onMicChange(this.value);"></select>
+		<select id="camsel" style="width:150px;" onchange="onCamChange(this.value);"></select>
+		<input style="width:150px;" type="text" id="volwatcher"placeholder="microphone volume"/>
+
+		</br>
+
+		<input style="width:110px;" type="button" disabled="true" id="detaudiodev" value="DetectAudioDev" onClick="detAudioDev();"/>
+		<input style="width:110px;" type="button" disabled="true" id="detvideodev" value="DetectVideoDev" onClick="detVideoDev();"/>
+		<input style="width:110px;" type="button" disabled="true" id="detnetstate" value="DetectNetState" onClick="detNetState();"/>
+		<input style="width:110px;" type="button" disabled="true" id="zoomout" value="ZoomOut" onClick="zoomOut();"/>
+		<input style="width:110px;" type="button" disabled="true" id="zoomin" value="ZoomIn" onClick="zoomIn();"/>
+		<input style="width:110px;" type="button" disabled="true" id="sendtextmsg" value="SendTextMsg" onClick="sendTextMsg();"/>
+		<input style="width:110px;" type="button" disabled="true" id="startmictest" value="StartMicTest" onClick="startMicTest();"/>
+		<input style="width:110px;" type="button" disabled="true" id="stopmictest" value="StopMicTest" onClick="stopMicTest();"/>
+
+		</br>
+		
+		<input style="width:110px;" type="button" disabled="true" id="setfocus" value="SetFocus" onClick="setFocusUser();"/>
+		<input style="width:110px;" type="button" disabled="true" id="removefocus" value="RemoveFocus" onClick="removeFocusUser();"/>
+		<input style="width:110px;" type="button" disabled="true" id="startrecord" value="StartRecord" onClick="startRecord();"/>
+		<input style="width:110px;" type="button" disabled="true" id="stoprecord" value="StopRecord" onClick="stopRecord();"/>
+
+		</br>
+
+		<input style="width:110px;" type="button" disabled="true" id="publishaudio" value="PublishAudio" onClick="publisAudio();"/>
+		<input style="width:110px;" type="button" disabled="true" id="unpublishaudio" value="UnpublishAudio" onClick="unpublisAudio();"/>
+		<input style="width:110px;" type="button" disabled="true" id="playaudio" value="PlayAudio" onClick="playAudio();"/>
+		<input style="width:110px;" type="button" disabled="true" id="unplayaudio" value="UnplayAudio" onClick="unplayAudio();"/>
+
+		</br>
+
+		<input style="width:110px;" type="button" disabled="true" id="publishvideo" value="PublishVideo" onClick="publisVideo();"/>
+		<input style="width:110px;" type="button" disabled="true" id="unpublishvideo" value="UnpublishVideo" onClick="unpublisVideo();"/>
+		<input style="width:110px;" type="button" disabled="true" id="playvideo" value="PlayVideo" onClick="playVideo();"/>
+		<input style="width:110px;" type="button" disabled="true" id="unplayvideo" value="UnplayVideo" onClick="unplayVideo();"/>
+
+		<hr width="80%">
+        <!-- SWFObject's dynamic embed method replaces this alternative HTML content with Flash content when enough 
+             JavaScript and Flash plug-in support is available. The div is initially hidden so that it doesn't show
+             when JavaScript is disabled.
+        -->
+		<div>
+        <div id="whiteboard" style='flaot:left;'>
+            <p>
+                To view this page ensure that Adobe Flash Player version 
+                11.1.0 or greater is installed. 
+            </p>
+            <script type="text/javascript"> 
+                var pageHost = ((document.location.protocol == "https:") ? "https://" : "http://"); 
+                document.write("<a href='http://www.adobe.com/go/getflashplayer'><img src='" 
+                                + pageHost + "www.adobe.com/images/shared/download_buttons/get_flash_player.gif' alt='Get Adobe Flash player' /></a>" ); 
+            </script> 
+        </div>
+		
+		<div id="video" style='flaot:left;'>
+            <div id="video_main">
+            <p>
+                To view this page ensure that Adobe Flash Player version 
+                11.1.0 or greater is installed. 
+            </p>
+            <script type="text/javascript"> 
+                var pageHost = ((document.location.protocol == "https:") ? "https://" : "http://"); 
+                document.write("<a href='http://www.adobe.com/go/getflashplayer'><img src='" 
+                                + pageHost + "www.adobe.com/images/shared/download_buttons/get_flash_player.gif' alt='Get Adobe Flash player' /></a>" ); 
+            </script> 
+			</div>
+			
+			<div id="video_slave">
+            <p>
+                To view this page ensure that Adobe Flash Player version 
+                11.1.0 or greater is installed. 
+            </p>
+            <script type="text/javascript"> 
+                var pageHost = ((document.location.protocol == "https:") ? "https://" : "http://"); 
+                document.write("<a href='http://www.adobe.com/go/getflashplayer'><img src='" 
+                                + pageHost + "www.adobe.com/images/shared/download_buttons/get_flash_player.gif' alt='Get Adobe Flash player' /></a>" ); 
+            </script> 
+			</div>
+        </div>
+		</div>
+         
+   </body>
+</html>

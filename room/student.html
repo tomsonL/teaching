@@ -1,0 +1,1373 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/index1.css">
+
+    <script type="text/javascript" src='js/jquery.js'></script>
+    <script type="text/javascript" src='js/md5.js'></script>
+
+    <style type="text/css">
+        object:focus {
+            outline: none;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body, iframe {
+            overflow: hidden;
+        }
+        #video_main, #video_slave {
+            position: absolute;
+            z-index: 120;
+            cursor: pointer;
+        }
+    </style>
+
+    <script language="javascript">
+        function GetRequest() {
+            var url = location.search; //获取url中"?"符后的字串
+            var theRequest = new Object();
+            if (url.indexOf("?") != -1) {
+                var str = url.substr(1);
+                strs = str.split("&");
+                for (var i = 0; i < strs.length; i++) {
+                    theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+                }
+            }
+            return theRequest;
+        }
+        var Request = new Object();
+        Request = GetRequest();
+        var room_Num, role_Type, user_Name, user_Pwd, user_Time, studentId, LessonId, courseName, nextTest = false;
+        room_Num = Request['room_Num'];//房间号
+        role_Type = Request['role_Type'];//角色类型
+        user_Name = decodeURIComponent(Request['user_Name']);//用户名
+        user_Pwd = Request['user_Pwd'];//密码
+        user_Time = Request['time_surplus'];//剩余时间
+        studentId = Request['studentId'];//学生id
+        LessonId = Request['LessonId'];//课程id
+        courseName = decodeURIComponent(Request['courseName']);//课名
+  
+        function thisMovie(movieName) {
+            var isIE = navigator.appName.indexOf("Microsoft") != -1;
+            return (isIE) ? window[movieName] : document[movieName];
+        }
+
+        function thisElement(id) {
+            return document.getElementById(id);
+        }
+
+        var badCount = 0;
+        var m_webServerIP = "www.weiyicloud.com";
+        var m_webServerPort = "80";
+
+        var SWFMODULECOUNT = 3;//需要加载的swf总模块数(一个白板模块和两个视频模块)
+        var m_curLoadedModuleCount = 0;//当前已经加载的swf模块数
+        var USERTYPE_STU = 0;//用户类型：学生
+        var USERTYPE_TEC = 1;//用户类型：教师
+
+        var fileList = new Array();//会议中的文件列表
+        var userList = new Array();//会议中的用户列表
+        var m_localUserInfo;//本地用户(自己)信息
+        var m_peerID;//本地用户(自己)的ID，此ID由服务器分配，接口中所有使用的用户ID均为服务器分配的用户ID
+        var m_userName;//本地用户(自己)用户名
+        var m_userType;//本地用户(自己)用户类型。0：学生、1：教师
+        var m_hasAudio;//本地用户是否有音频设备
+        var m_hasVideo;//本地用户是否有视频设备
+        var m_mediaServerIP;
+        var m_mediaServerTcpPort;
+        var m_mediaServerUdpPort;
+
+        var m_micList = new Array();//麦克风列表
+        var m_camList = new Array();//摄像头列表
+        var m_curMicIndex;//当前麦克风索引
+        var m_curMicName;//当前麦克风名字
+        var m_curCamIndex;//当前摄像头索引
+        var m_curCamName;//当前摄像头名字
+        var m_curCamWidth;//当前摄像头分辨率---宽
+        var m_curCamHeight;//当前摄像头分辨率---高
+        //白板模块和视频模块的回调函数名相同，故回调处理统一在此完成
+        var OnFlashInvoke = function () {
+            var cbkFuncName = arguments[0];
+            switch (cbkFuncName) {
+                //<!-- 以下为白板模块的回调 -->
+                //加载会议文件列表，需修改
+                case "OnGetMeetingFileReply":
+                    if (arguments[1].result == 0) {
+                        fileList = arguments[1].meetingfile;
+                        fileList.push(arguments[1].whiteboard);
+                        var sel = $('#sel');
+                        for (var index = 0; index < fileList.length; index++) {
+                            var optionItem = $('<li></li>');
+                            optionItem.attr('value', index);
+                            optionItem.append($('<img src="img/CAIItem.png" alt="">'));
+                            optionItem.append($('<span>' + fileList[index].filename.substring(0, 6) + '</span>'));
+                            optionItem.append($('<img class="imgRight" src="img/eyeB.png" alt="">'));
+                            //fileList中的每个文集都有filename、fileid字段
+                            sel.append(optionItem);
+                        }
+                        //console.log(sel);
+                    }
+                    break;
+
+                case "OnNetConnectionReply":
+                    onNetConnectionReply(arguments[1]);
+                    break;
+                    //获取自己的信息，服务器用户Id,类型，是否有音视频
+                case "OnEnablePresence":
+                    m_localUserInfo = arguments[1];
+                    m_peerID = m_localUserInfo.peerID;
+                    m_userName = m_localUserInfo.userName;
+                    m_userType = m_localUserInfo.userType;
+                    m_hasAudio = m_localUserInfo.hasAudio;
+                    m_hasVideo = m_localUserInfo.hasVideo;
+                    break;
+
+                case "OnWBModulePrepareComplete":
+                    m_curLoadedModuleCount++;
+                    m_mediaServerIP = arguments[1];
+                    m_mediaServerTcpPort = arguments[2];
+                    m_mediaServerUdpPort = arguments[3];
+                    //白板模块准备完成，设置白板属性
+                    thisMovie("MicroLanguage_WB").Flash_SetWBPenColor(0xff0000);
+                    thisMovie("MicroLanguage_WB").Flash_SetWBPenThickness(5);
+                    thisMovie("MicroLanguage_WB").Flash_SetWBPenAlpha(1);
+                    thisMovie("MicroLanguage_WB").Flash_SetWBRectColor(0x00ff00);
+                    thisMovie("MicroLanguage_WB").Flash_SetWBRectThickness(5);
+                    thisMovie("MicroLanguage_WB").Flash_SetWBRectAlpha(1);
+                    thisMovie("MicroLanguage_WB").Flash_SetWBTextColor(0x0000ff);
+                    thisMovie("MicroLanguage_WB").Flash_SetWBTextFont("微软雅黑");
+                    thisMovie("MicroLanguage_WB").Flash_SetWBTextSize(12);
+                    initial();
+                    break;
+
+                case "OnUserIn":
+                    userList.push(arguments[1]);
+                    if (arguments[1].userType == 1 && arguments[1].userName != 'checker') {
+                        console.log('教师');
+                        $('.tchCover').remove();
+                        thisMovie("video_slave").Flash_UnplayAudio(parseInt(arguments[1].peerID));
+                        thisMovie("video_slave").Flash_PlayAudio(parseInt(arguments[1].peerID));
+                        thisMovie("video_slave").Flash_PlayVideo(parseInt(arguments[1].peerID), 0);
+                        console.log(arguments[1].peerID);
+                    }
+                    else if (arguments[1].userName == 'checker') {
+                        thisMovie("video_manager").Flash_UnplayAudio(parseInt(arguments[1].peerID));
+                        thisMovie("video_manager").Flash_PlayAudio(parseInt(arguments[1].peerID));
+                    }
+                    break;
+                    //用户退出信息相关
+                case "OnUserOut":
+                    var outUserID = arguments[1];
+                    var div = $('<div>').css({
+                        'width': $("#video_slave").width(),
+                        'height': $("#video_slave").height(),
+                        'position': 'absolute',
+                        'z-index': 200,
+                        'background-color': '#000'
+                    }).append($('<p>断开连接<br />Disconnection</p>').css({
+                        'color': '#fff',
+                        'height': 60,
+                        'text-align': 'center',
+                        'font-size': '20px',
+                        'margin-top': '32%'
+                    }));
+                    for (var i = 0; i < userList.length; i++) {
+                        if (userList[i].peerID == outUserID) {
+                            if (userList[i].userType == 1 && userList[i].userName != 'checker') {
+                                $('.videoBox').append(div.clone().addClass('tchCover').css({
+                                    'top': $('#video_slave').css('top'),
+                                    'left': $('#video_slave').css('left'),
+                                    'right': $('#video_slave').css('right')
+                                }));
+                            }
+                            userList.splice(i, 1);
+                            break;
+                        }
+                    }
+                    break;
+
+                case "OnShowPage":
+                    var showingFileID = arguments[1];
+                    var showingPageID = arguments[2];
+                    for (var i = 0; i < fileList.length; i++) {
+                        if (fileList[i].fileid == showingFileID) {
+                            thisElement('sel').options[i].selected = true;
+                            break;
+                        }
+                    }
+                    break;
+                    //文本信息接口，暂时没用
+                case "OnReceiveTextMsg":
+                    var fromID = arguments[1];
+                    var msgBody = arguments[2];
+                    var fromName;
+                    
+                    for (var i = 0; i < userList.length; i++) {
+                        if (userList[i].peerID == fromID) {
+                            fromName = userList[i].userName;
+
+                            var transLi = $('<li class="leftMsg">');
+                            $('#msgList').append(transLi.html("<div><span>"+ msgBody +"</span><button>译</button></div>"));
+
+                            transLi.on('click','button',function(){
+                                
+                                var thisO = $(this);
+                                var query = $(this).prev().html(),
+                                    parentLi = $(this).parents('li');
+                                if($(this).attr('isTrans') === undefined)
+                                {
+
+                                    trans(query,function(data){
+                                        // data.trans_result[0].dst;
+                                        var msg = data.trans_result[0].dst;
+                                        thisO.attr('isTrans',false);
+                                        var transLiResult = $('<li class="leftMsg">');
+                                        parentLi.after(transLiResult.html("<div><span>"+ msg +"</span><button>译</button></div>"));
+                                        transLiResult.on('click','a',function(){
+                                            $(this).parents('li.leftMsg').remove();
+                                            thisO.removeAttr('isTrans');
+                                        })
+                                    },'en','zh');
+                                } 
+                            })
+                            break;
+                        }
+                    }
+                    break;
+
+                    //<!-- 以下为视频模块的回调 -->
+                case "OnVideoModulePrepareComplete":
+                    m_curLoadedModuleCount++;
+                    initial();
+                    break;
+
+                case "OnCamChanged":
+                    var camOpened = arguments[1];
+                    if (camOpened == true) {
+                        publisVideo();
+                    }
+                    else if (camOpened == false) {
+                        unpublisVideo();
+                    }
+                    break;
+                    //打开或关闭麦克风窗口
+                case "OnMicChanged":
+                    var micOpend = arguments[1];
+                    if (micOpend == true) {
+                        publisAudio();
+                    }
+                    else if (micOpend == false) {
+                        unpublisAudio();
+                    }
+                    break;
+
+                case "OnUpNetState":
+                    var upSta = arguments[1];
+                    //console.log(upSta);
+                    if (upSta == 0) {
+                        //console.log("Uplink network good");
+                    }
+                    else if (upSta == 1) {
+                          console.log("Uplink network bad");
+                        if (badCount == 20) {
+                            unpublisVideo();
+                            sendTextMsg("@@@###netbad");
+                            isNetOk = false;
+                        } else {
+                            badCount++;
+                        }
+                    }
+                    break;
+
+                case "OnDownNetState":
+                    var downSta = arguments[1];
+                    if (downSta == 0) {
+                        // console.log("Downlink network good");
+                    }
+                    else if (downSta == 1) {
+                        // console.log("Downlink network bad");
+                    }
+                    break;
+
+                case "OnDetecAudioDevReply":
+                    var aDev = arguments[1];
+                    if (aDev == 0) {
+                        console.log("Normal audio device");
+                    }
+                    else if (aDev == -1) {
+                        console.log("No audio device");
+                    }
+                    else if (aDev == -2) {
+                        console.log("Audio device disabled");
+                    }
+                    break;
+
+                case "OnDetectVideoDevReply":
+                    var vDev = arguments[1];
+                    if (vDev == 0) {
+                        console.log("Normal video device");
+                    }
+                    else if (vDev == -1) {
+                        console.log("No video device");
+                    }
+                    else if (vDev == -2) {
+                        console.log("Video device disabled");
+                    }
+                    break;
+
+                case "OnDetectNetStateReply":
+                    var netSta = arguments[1];
+                    if (netSta == 0) {
+                        console.log("Network good");
+                    }
+                    else if (netSta == 1) {
+                        console.log("Network bad");
+                    }
+                    break;
+                case "OnGetMicListReply":
+                    m_micList = arguments[1];
+                    m_curMicIndex = arguments[2];
+                    m_curMicName = arguments[3];
+                    $("#micsel").empty();
+                    var micsel = thisElement('micsel');
+                    for (var index = 0; index < m_micList.length; index++) {
+                        var optionItem = document.createElement("OPTION");
+                        optionItem.value = index;
+                        optionItem.text = m_micList[index];
+                        micsel.options.add(optionItem);
+                    }
+
+                    if (m_curMicIndex < m_micList.length) {
+                        micsel.options[m_curMicIndex].selected = true;
+                    }
+                    break;
+
+                case "OnGetCamListReply":
+                    m_camList = arguments[1];
+                    m_curCamIndex = arguments[2];
+                    m_curCamName = arguments[3];
+                    m_curCamWidth = arguments[4];
+                    m_curCamHeight = arguments[5];
+                    $('#camsel').empty();
+                    var camsel = thisElement('camsel');
+                    for (var index = 0; index < m_camList.length; index++) {
+                        var optionItem = document.createElement("OPTION");
+                        optionItem.value = index;
+                        optionItem.text = m_camList[index];
+                        camsel.options.add(optionItem);
+                    }
+
+                    if (m_curCamIndex < m_camList.length) {
+                        camsel.options[m_curCamIndex].selected = true;
+                    }
+                    break;
+                case "OnUpVideoBWReply":
+                    //发布自己的视频后(即调用Flash_PublishVideo)会收到此回调，每3秒收一次。单位:kbps
+                    // console.log("up bandwidth: "+arguments[1]+"kbps");
+                    break;
+
+                case "OnDownVideoBWReply":
+                    //播放别人的视频后(即调用Flash_PlayVideo接口)会收到此回调，每3秒收一次。单位:kbps
+                    //console.log("user id: "+arguments[1]+"  video id："+arguments[2]+"  down bandwidth: "+arguments[3]+"kbps");
+                    break;
+                case "OnDevStatusChange":
+                    var mutedStatus = arguments[1];
+                    if (mutedStatus == -1) {
+                        nextTest = false;
+                        // console.log("audio&video device were muted");//点击了拒绝
+                    }
+                    else if (mutedStatus == 0) {
+                        nextTest = true;
+                        //$('#nowBegin').removeClass('dis');
+                        //console.log("audio&video device were unmuted");//点击了允许
+                    }
+                    break;
+
+                case "OnMicLoopBackVolReply":
+                    thisElement("volwatcher").value = arguments[1];
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        //会议文件变更加载
+        function onFileChange(value) {
+            var fileID = fileList[value].fileid;//文档ID
+            var pageNum = fileList[value].pagenum;//文档总页数。注：白板无此字段
+            thisMovie("MicroLanguage_WB").Flash_ShowFile(fileID, 1);
+        }
+
+        function playVideo() {
+            //<!-- 调用从视频模块中的播放视频方法，在从视频模块中播放指定用户的视频 -->
+            thisMovie("video_slave").Flash_PlayVideo(parseInt(thisElement("uid").value), 0);
+        }
+
+        function unplayVideo() {
+            //<!-- 调用从视频模块中的停止播放视频方法，停止从视频模块中正在播放的视频 -->
+            thisMovie("video_slave").Flash_UnplayVideo(parseInt(thisElement("uid").value), 0);
+        }
+
+        function playAudio() {
+            //<!-- 调用主视频模块中的播放音频方法，通过主视频模块播放指定用户的音频 -->
+            thisMovie("video_main").Flash_PlayAudio(parseInt(thisElement("uid").value));
+        }
+
+        function unplayAudio() {
+            //<!-- 调用主视频模块中的停止播放音频方法，停止在主视频模块中正在播放的音频 -->
+            thisMovie("video_main").Flash_UnplayAudio(parseInt(thisElement("uid").value));
+        }
+
+        function publisAudio() {
+            //<!-- 调用主视频模块中的发布音频方法，通过主视频模块发布自己的音频 -->
+            thisMovie("video_main").Flash_PublishAudio();
+        }
+
+        function unpublisAudio() {
+            //<!-- 调用主视频模块中的停止发布音频方法，通过主视频模块停止发布自己的音频 -->
+            thisMovie("video_main").Flash_UnpublishAudio();
+        }
+
+        function publisVideo() {
+            //<!-- 调用主视频模块中的发布视频方法，通过主视频模块发布自己的视频 -->
+            thisMovie("video_main").Flash_PublishVideo(0);
+        }
+
+        function unpublisVideo() {
+            //<!-- 调用主视频模块中的停止发布视频方法，通过主视频模块停止发布自己的视频 -->
+            thisMovie("video_main").Flash_UnpublishVideo(0);
+        }
+
+        function sendTextMsg(msg) {
+            //<!-- 调用白板模块中的发送文本消息方法，向会议中其他用户发送文本消息 -->
+            thisMovie("MicroLanguage_WB").Flash_SendTextMsg(msg, 0);
+        }
+
+        function setFocusUser() {
+            //<!-- 调用白板模块中的设置焦点用户的方法，设置录制焦点 -->
+            thisMovie("MicroLanguage_WB").Flash_SetFocusUser(parseInt(thisElement("uid").value));
+        }
+
+        function removeFocusUser() {
+            //<!-- 调用白板模块中的移除焦点用户的方法，移除录制焦点 -->
+            thisMovie("MicroLanguage_WB").Flash_RemoveFocusUser(parseInt(thisElement("uid").value));
+        }
+
+        function startRecord() {
+            //<!-- 调用白板模块中的开始录制方法，录制会议音视频 -->
+            thisMovie("MicroLanguage_WB").Flash_StartRecord();
+        }
+
+        function stopRecord() {
+            //<!-- 调用白板模块中的停止录制方法，停止录制会议音视频 -->
+            thisMovie("MicroLanguage_WB").Flash_StopRecord();
+        }
+
+        function detAudioDev() {
+            //<!-- 调用主视频模块中的检测音频设备方法，检测音频设备状态 -->
+            thisMovie("video_main").Flash_DetectAudioDevice();
+        }
+
+        function detVideoDev() {
+            //<!-- 调用主视频模块中的检测视频设备方法，检测视频设备状态 -->
+            thisMovie("video_main").Flash_DetectVideoDevice();
+        }
+
+        function detNetState() {
+            //<!-- 调用主视频模块中的检测网络状态方法，检测网络状态 -->
+            thisMovie("video_main").Flash_DetectNetState();
+        }
+
+        function onNetConnectionReply(status) {
+            switch (status) {
+                case "Success":
+                    //<!-- 成功连接到服务器 -->
+                    //alert("Connect server success");
+                    break;
+                case "Failed":
+                    //<!-- 无法连接到服务器 -->
+                    // alert("Connect server failed");
+                    break;
+                case "Rejected":
+                    //<!-- 连接服务器被拒绝，一般是点数超限造成 -->
+                    // alert("Connect server rejected");
+                    break;
+                case "Closed":
+                    //<!-- 与服务器的连接中断 -->
+                    // alert("Server connection closed");
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        function initial() {
+            if (m_curLoadedModuleCount < SWFMODULECOUNT) return;//通过此方式确保initial函数只执行一次
+            thisMovie("video_main").Flash_SetConnectionInfo(m_mediaServerIP, m_mediaServerTcpPort, m_mediaServerUdpPort);
+            thisMovie("video_main").Flash_SetSelfProperty(m_localUserInfo);
+            thisMovie("video_slave").Flash_SetConnectionInfo(m_mediaServerIP, m_mediaServerTcpPort, m_mediaServerUdpPort);
+            thisMovie("video_slave").Flash_SetSelfProperty(m_localUserInfo);
+            thisMovie("video_main").Flash_PlayVideo(m_peerID, 0);
+            getAVDevList();
+            publisAudio();
+            publisVideo();
+        }
+
+        //<!-- 获取音视频设备列表 -->
+        //<!-- 注：Flash没有获取扬声器的能力 -->
+        function getAVDevList() {
+            //获取麦克风列表，通过OnGetMicListReply回调返回麦克风信息
+            thisMovie("video_main").Flash_GetMicList();
+            //获取摄像头列表，通过OnGetCamListReply回调返回摄像头信息
+            thisMovie("video_main").Flash_GetCamList();
+        }
+
+        function onMicChange(value) {
+            //Flash_SetMicrophone(index)
+            //index:麦克风索引
+            thisMovie("video_main").Flash_SetMicrophone(value);
+            m_curCamIndex = value;
+        }
+
+        function onCamChange(value) {
+            //Flash_SetCamera(index,wid,hei)
+            //index:摄像头索引
+            //wid:分辨率宽
+            //hei:分辨率高
+            thisMovie("video_main").Flash_SetCamera(value, m_curCamWidth, m_curCamHeight);
+            m_curCamIndex = value;
+        }
+
+        function zoomOut() {
+            thisMovie("video_main").width = 640;
+            thisMovie("video_main").height = 480;
+        }
+
+        function zoomIn() {
+            thisMovie("video_main").width = 320;
+            thisMovie("video_main").height = 240;
+        }
+
+        var lineNum = 0;
+        function printlog(log) {
+            ++lineNum;
+            thisElement("logconsole").value = thisElement("logconsole").value + lineNum + ". " + log + "\r\n";
+        }
+
+        var micIndex = 0;
+        var micTesting = false;
+        function startMicTest() {
+            micIndex = thisElement("micsel").selectedIndex;
+            thisMovie("video_main").Flash_StartMicLoopBack(micIndex);
+            micTesting = true;
+        }
+
+        function stopMicTest() {
+            thisMovie("video_main").Flash_StopMicLoopBack(micIndex);
+        }
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="history/history.css" />
+
+    <script type="text/javascript" src="history/history.js"></script>
+
+    <script type="text/javascript" src="swfobject.js"></script>
+
+    <script type="text/javascript">
+        var swfVersionStr = "11.1.0";
+        var xiSwfUrlStr = "playerProductInstall.swf";
+        var flashvars = { ip: m_webServerIP, port: m_webServerPort, mid: room_Num, uname: user_Name, pwd: user_Pwd, utype: role_Type };
+        var params = {};
+        params.quality = "high";
+        params.bgcolor = "#869ca7";
+        params.allowscriptaccess = "sameDomain";
+        params.allowfullscreen = "true";
+        params.wmode = "transparent";
+        var attributes = {};
+        attributes.id = "MicroLanguage_WB";
+        attributes.name = "MicroLanguage_WB";
+        attributes.align = "left";
+        swfobject.embedSWF(
+            "MicroLanguage_WB.swf", "whiteboard","600", "450",
+            swfVersionStr, xiSwfUrlStr,flashvars, params, attributes);
+        swfobject.createCSS("#whiteboard", "display:block;text-align:left;");
+    </script>
+    <script type="text/javascript">
+        var swfVersionStr = "11.1.0";
+        var xiSwfUrlStr = "playerProductInstall.swf";
+        var flashvars = { ip: m_webServerIP, port: m_webServerPort,  mid: room_Num, toolbarinvisible: 0, uncollectav: 0 };
+        var params = {};
+        params.quality = "high";
+        params.bgcolor = "#869ca7";
+        params.allowscriptaccess = "sameDomain";
+        params.allowfullscreen = "true";
+        params.wmode = "transparent";
+        var attributes = {};
+        attributes.id = "video_main";
+        attributes.name = "video_main";
+        attributes.align = "middle";
+        swfobject.embedSWF(
+            "MicroLanguage_Video.swf", "video_main","100%", "100%",
+            swfVersionStr, xiSwfUrlStr,flashvars, params, attributes);
+        swfobject.createCSS("#video_main", "display:block;text-align:left;");
+    </script>
+    <script type="text/javascript">
+        var swfVersionStr = "11.1.0";
+        var xiSwfUrlStr = "playerProductInstall.swf";
+         var flashvars = { ip: m_webServerIP, port: m_webServerPort,  mid: room_Num, toolbarinvisible: 1, uncollectav: 1 };
+        var params = {};
+        params.quality = "high";
+        params.bgcolor = "#869ca7";
+        params.allowscriptaccess = "sameDomain";
+        params.allowfullscreen = "true";
+        var attributes = {};
+        attributes.id = "video_slave";
+        attributes.name = "video_slave";
+        attributes.align = "middle";
+        params.wmode = "transparent";
+        swfobject.embedSWF(
+            "MicroLanguage_Video.swf", "video_slave","320", "240",
+            swfVersionStr, xiSwfUrlStr,flashvars, params, attributes);
+        swfobject.createCSS("#video_slave", "display:block;text-align:left;");
+    </script>
+
+</head>
+<body>
+    <div class='classMain'>
+        <div class="classTop">
+            <div class="leftTitle">
+                <span class="classTitle" id='spanFileName'>剑桥少儿英语--第1课 Talking about Time and Date</span>
+                <span class="classTime"><span id='minute'>00</span>分<span id='second'>00</span>秒</span>
+            </div>
+            <div class="rightTitle" style=''>
+                <a href="javascript:;" id='gotoTestDev' class='debug'>设备调试</a> <span class="complain">
+                    投诉
+                </span>
+            </div>
+        </div>
+        <!-- 白板区 -->
+        <div class="course">
+            <div class="courseContent">
+                <div class="whiteCover">
+                </div>
+                <div id="whiteboard">
+                </div>
+            </div>
+        </div>
+        <!-- 课件区结束 -->
+        <!-- 右边窗口 -->
+        <div class="rightWindow">
+            <!-- 视频窗口 -->
+            <div class='teachDiv' id="video">
+                <div class='teacherDiv'>
+                    <!-- <div class='magnify'></div> -->
+                    <div class="teacherAudio">
+                        <span id='closeTeacher' style='position: absolute; width: 20px; height: 20px; text-align: center;
+                            color: #fff; font-size: 22px; line-height: 20px; border: 1px solid #fff; border-radius: 50%;
+                            left: 10px; top: 10px; z-index: 999; cursor: pointer; display: none;'>
+                            &times;
+                        </span>
+                    </div>
+                </div>
+                <div class="studentDiv">
+                    <div class="studentAudio">
+                        <span id='closeStudent' style='position: absolute; width: 20px; height: 20px; text-align: center;
+                            color: #fff; font-size: 22px; line-height: 20px; border: 1px solid #fff; border-radius: 50%;
+                            left: 10px; top: 10px; z-index: 999; cursor: pointer; display: none;'>
+                            &times;
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="mesWindow">
+                <style type="text/css">
+                    #trans #transContext{
+                        width:126px;
+                        height: 18px;
+                        padding:2px;
+                        outline: none;
+                        margin-left: 4px;
+                    }
+                    #sendMsg{
+                        height: 260px;
+                        position: relative;
+                    }
+                    #sendMsg button{
+                        position: absolute;
+                        z-index: 2;
+                        right:2px;
+                        bottom:-30px;
+                    }
+                    #msgSection{
+                        padding:6px 10px 6px;
+                        overflow: auto;
+
+                    }
+                    #sendTransTxt{
+                        height: 30px;
+                        cursor: pointer;
+                        border:4px;
+                        width: 60px;
+                    }
+
+                    #msgList li{
+                        font-size: 12px;
+                        margin-top:4px;
+                        width: 170px;
+                        overflow: hidden;
+                    }
+                    #msgList li span{
+                        padding:4px;
+                        max-width: 140px;
+                        display: inline-block;
+                        border-radius:4px;
+                        word-wrap:break-word;
+                        break-word:break-all;
+                        text-align: left;
+                    }
+                    #msgList li div{
+                        display: inline-block;
+                        position: relative;
+                    }
+                    #msgList li button{
+                        position: absolute;
+                        width: 20px;
+                        font-size: 12px;
+                        cursor: pointer;
+                        display: none;
+                    }
+                    #msgList li:hover button{
+                        display: block;
+                    }
+                    #msgList .leftMsg{
+                        text-align: left;
+                    }
+                    #msgList .rightMsg{
+                        text-align: right;
+                    }
+
+                    #msgList .leftMsg div{
+                        float: left;
+                    }
+                    #msgList .rightMsg div{
+                        float: right;
+                    }
+                    .leftMsg button{
+                        bottom:0;
+                        right:-20px;
+                    }
+                    .rightMsg button{
+                        bottom:0;
+                        left:-20px;
+                    }
+                    .leftMsg a,.rightMsg a{
+                        position: absolute;
+                        top:2px;
+                        right:2px;
+                        width:16px;
+                        height: 16px;
+                        text-align: center;
+                        line-height: 16px;
+                        border-radius: 50%;
+                        background-color: #ccc;
+                        display: none;
+                    }
+                    .leftMsg:hover a,.rightMsg:hover a{
+                        display: block;
+                    }
+                    #msgList .leftMsg span{
+                        background-color: #2e99c9;
+                    }
+                    #msgList .rightMsg span{
+                        background-color: #4ead36;
+                    }
+                    #trans{
+                        position: relative;
+                    }
+                    .tansAlert{
+                        position:absolute;
+                        top:-208px;
+                        height: 190px;
+                        width: 188px;
+                        border:1px solid #ccc;
+                        margin-left: 4px;
+                        display: none;
+                    }
+                    .tansAlert label{
+                        cursor: pointer;
+                        overflow: hidden;
+                        vertical-align:middle;
+                        display:inline-block;
+                        height: 26px;
+                        line-height: 26px;
+                    }
+                    #transingResult{
+                        width: 176px;
+                        padding:6px;
+                        height: 88px;
+                        resize:none;
+                        outline: none;
+                        border:0;
+                        border-bottom:1px solid #ccc;
+                    }
+                    #transingContent{
+                        width: 176px;
+                        padding:6px;
+                        height: 44px;
+                        resize:none;
+                        outline: none;
+                        border:0;
+                        border-top:1px solid #ccc;
+                        font-size: 12px;
+                    }
+                    
+                    #transing{
+                        width: 36px;
+                        height: 58px;
+                        border:0;
+                        cursor: pointer;
+                        position: absolute;
+                        bottom:0;
+                        right:0;
+                        background-color: #2ab3f1;
+                        color:#fff;
+                    }
+                    .tranBox{
+                        background: #eee;
+                        line-height: 30px;
+                    }
+                    .tranBox img{
+                        display: inline-block;
+                        vertical-align: middle;
+                        margin-left: 10px;
+                        cursor: pointer;
+                    }
+                </style>
+                <div id="msgSection" class=''>
+                    <ul id='msgList' style=''>
+                       <!--  <li class='leftMsg'>
+                            <div>
+                                <span>hello world</span>
+                                <button>译</button>
+                            </div>                           
+                        </li>
+                        <li class="rightMsg">
+                            <div>
+                                <span>#4ead364ead364ead364ead364ead364ead364ead364ead36</span>
+                            </div>
+                        </li> -->
+                    </ul>
+                </div>
+               <div id="trans">
+                    <div class="tranBox">
+                        <img src="img/trans.png" alt="">
+                    </div>
+                    <div class="tansAlert">
+                        <div id="transingResult"></div> &nbsp;&nbsp;
+                        <label>
+                            <input name='transType' value='zh_en' checked type="radio" style='display:inline-block;vertical-align:middle;margin-top:-2px;'> zh>>en
+                        </label>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <label>
+                            <input name='transType' value='en_zh' type="radio" style='display:inline-block;vertical-align:middle;margin-top:-2px;'> en>>zh
+                        </label>
+                        <textarea placeholder='请输入您想要翻译的内容' name="" id="transingContent" cols="30" rows="10"></textarea>
+                        <input type="button" id='transing' value='翻译'>
+                    </div>
+                </div>
+                <div id="sendMsg" class='sendMsg'>
+                    <textarea name="" id="msgText" style='outline:none;border:0;width:192px;height:252px;max-height:260px;min-height:250px;padding:4px;resize:none;'></textarea>
+                    <button id='sendTransTxt'>发送</button>
+                </div>
+                
+            </div>
+        </div>
+        <div class="mainCover">
+            <div class="CoverApcity">
+            </div>
+            <div class="CoverContent">
+                <p>
+                    投诉
+                </p>
+                <ul>
+                    <li>
+                        <img src="img/checkbox.png" alt=""><span>老师缺席</span>
+                    </li>
+                    <li>
+                        <img src="img/checkbox.png" alt=""><span>麦克风没声音</span>
+                    </li>
+                    <li>
+                        <img src="img/checkbox.png" alt=""><span>老师迟到</span>
+                    </li>
+                    <li>
+                        <img src="img/checkbox.png" alt=""><span>教材没加载出来</span>
+                    </li>
+                    <li>
+                        <img src="img/checkbox.png" alt=""><span>音视频卡顿</span>
+                    </li>
+                    <li>
+                        <img src="img/checkbox.png" alt=""><span>材料内有错误</span>
+                    </li>
+                    <li>
+                        <img src="img/checkbox.png" alt=""><span>听不清老师</span>
+                    </li>
+                    <li>
+                        <img src="img/checkbox.png" alt=""><span>白板划线看不到</span>
+                    </li>
+                </ul>
+                <div class='CoverFooter'>
+                    <a href="javascript:;" id='submit'>提交</a> <a href="javascript:;" id='cancel'>取消</a>
+                </div>
+            </div>
+        </div>
+        <div class="videoBox">
+            <div id="toggle">
+                <span></span>
+                <img src="img/right.png" alt="">
+            </div>
+            <div id="video_main">
+            </div>
+            <div id="video_manager">
+            </div>
+            <div id="video_slave">
+            </div>
+        </div>
+        <!-- 弹出设备选择 -->
+        <div class='alertOneTest' style='display: none;'>
+            <h3 style='margin: 20px auto; text-align: center; font-size: 20px;'>
+                欢迎您进行设备设置
+            </h3>
+            <div class="fl">
+                <p style='line-height: 32px;'>
+                    1、通过<img style='display: inline-block; margin: 0 4px; vertical-align: center;' src="img/audio.png"
+                             alt="">摄像头按钮设置打开或关闭摄像头
+                </p>
+                <p style='padding-right: 36px;'>
+                    2、如果视频或音频不正常，请在下列设备列表中选择：
+                </p>
+                <p class='selD' style='margin-top: 26px;'>
+                    摄像头<select class='selectDevice' name="" id="camsel" onchange="onCamChange(this.value);"></select>
+                </p>
+                <p class='selD'>
+                    麦克风<select class='selectDevice' name="" id="micsel" onchange="onMicChange(this.value);"></select>
+                </p>
+                <a href="javascript:;" class='' id='nowBegin'>立即上课</a>
+            </div>
+        </div>
+        <!-- 倒计时 -->
+        <div class='deviceCover' style='display: none;'>
+        </div>
+        <div id="alertTime" style='display: none; position: fixed; left: 50%; margin-left: -150px;
+            top: 300px; width: 300px; height: 160px; text-align: center; line-height: 160px;
+            font-size: 20px; color: #08bbf2; background-color: #fff; box-shadow: 0 0 20px #000;'>
+            <span id='surplus_Time'></span>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var winWidth = 0,
+        isRight = false,
+        winHeight = 0,
+        VideoProportion = 1.33,//视频宽高比例
+        alertVideoWidth = 240,//弹窗中的视频宽
+        canMoveVideo = false,
+        videoWidth,//上课时视频宽
+        videoHeight,//上课时视频高
+        iframeTextWidth = videoBoxRight = 200;
+        //函数：获取尺寸
+        function findDimensions() {
+            //获取窗口宽度
+            if (window.innerWidth)
+                winWidth = window.innerWidth;
+            else if ((document.body) && (document.body.clientWidth))
+                winWidth = document.body.clientWidth;
+            //获取窗口高度
+            if (window.innerHeight)
+                winHeight = window.innerHeight;
+            else if ((document.body) && (document.body.clientHeight))
+                winHeight = document.body.clientHeight;
+            //通过深入Document内部对body进行检测，获取窗口大小
+            if (document.documentElement && document.documentElement.clientHeight && document.documentElement.clientWidth) {
+                winHeight = document.documentElement.clientHeight;
+                winWidth = document.documentElement.clientWidth;
+            }
+            videoWidth = (winHeight - 50 - 40) / 2 * VideoProportion;//上课时视频宽
+            videoHeight = (winHeight - 50 - 40) / 2;//上课时视频高
+        }
+        findDimensions();
+
+        //初始化聊天
+        // $('#ifrText').attr('src', 'http://182.92.236.234:881/Hubs/Chat/?a=1&name=' + user_Name + '&type=student&roomNO=' + room_Num);
+
+        function trans(query,fn,from,to){
+            if(query === undefined){
+                console.log('翻译内容不能为空');
+                return;
+            }
+            var appid = '20161021000030557';
+            var salt = (new Date).getTime();
+            var key = 't71CUUmFXHV6FI52l5K5';
+
+            // 多个query可以用\n连接  如 query='apple\norange\nbanana\npear'
+            
+            var from = from === undefined ? 'en' : from;
+            var to = to === undefined ?  'zh' : to;
+            
+            var str1 = appid + query + salt +key;
+            
+            var sign = MD5(str1);
+            $.ajax({
+                url: 'http://api.fanyi.baidu.com/api/trans/vip/translate',
+                type: 'post',
+                dataType: 'jsonp',
+                data:{
+                    q: query,
+                    appid: appid,
+                    salt: salt,
+                    from: from,
+                    to: to,
+                    sign: sign
+                },
+                success: fn
+            });
+        }
+        
+        //初始化聊天窗口
+        var transTxt_height = 30,
+            sendMsg = 260,
+            topHeight = 52,
+            sendMsgButton_height = 40;
+        function initMsgWindow(){
+            var msgListHeight = winHeight - topHeight - sendMsg - transTxt_height - sendMsgButton_height;
+            
+            $("#msgSection").height(msgListHeight);
+            $("#sendMsg").height(sendMsg);
+        }
+
+
+        initMsgWindow();
+
+
+        //初始化视频盒子的宽高
+        $('.videoBox').css({
+            'height': winHeight - 50,
+            'width': videoWidth,
+            'position': 'absolute',
+            'right': videoBoxRight
+        });
+
+        //将获取到的课程名放到DOM中
+        $("#spanFileName").text(decodeURIComponent(courseName));
+
+        window.onload = function () {
+
+            $('.tranBox img').on('click',function(){
+                $('.tansAlert').toggle();
+                $("#transingResult").html('');
+                $('#transingContent').val('');
+            });
+
+
+
+            //翻译框
+            // transingResult  transingContent  transing
+            $("#transing").on('click',function(){
+                var transingContent = $('#transingContent').val();
+                
+                var checkFrom = $("input[name='transType']:checked").val();
+                if(checkFrom.trim() === ''){
+                    return;
+                }
+                if(checkFrom === 'zh_en'){
+                    trans(transingContent,function(data){
+                        $("#transingResult").html(data.trans_result[0].dst);
+                    },'zh','en');
+                }
+                else{
+                    trans(transingContent,function(data){
+                        $("#transingResult").html(data.trans_result[0].dst);
+                    },'en','zh');
+                }
+                
+            })
+
+            //发送消息事件
+            $('#sendTransTxt').on('click',function(e){
+               
+                sendingMsg();
+            });
+
+            //聊天窗口翻译效果
+            $(".leftMsg,.rightMsg").on('click','button',function(){
+                
+                var thisO = $(this);
+                var query = $(this).prev().html(),
+                    parentLi = $(this).parents('li');
+                if($(this).attr('isTrans') === undefined)
+                {
+                    trans(query,function(data){
+                        // data.trans_result[0].dst;
+                        var msg = data.trans_result[0].dst;
+                        thisO.attr('isTrans',false);
+                        var transLi = $('<li class="leftMsg">');
+                        parentLi.after(transLi.html("<div><span>"+ msg +"</span><a href='javascript:;'>&times;</a></div>"));
+                        transLi.on('click','a',function(){
+                            $(this).parents('li.leftMsg').remove();
+                            thisO.removeAttr('isTrans');
+                        })
+                    },'en','zh');
+                } 
+            })
+            
+
+
+            //回车发送消息
+            $(document).on('keydown',function(e){
+                
+                if(e.keyCode === 13 && document.activeElement == activeE){
+                    sendingMsg();
+                }
+            })
+
+
+            var activeE = document.getElementById('msgText');
+            //发送消息处理函数
+            function sendingMsg(){
+                var msg = $("#msgText").val();
+                if(msg.trim()){
+                    sendTextMsg(msg);
+                    //OnReceiveTextMsg 消息回调
+                    // var spanDom = $("<span>").html($("#msgText").val());
+                    $("#msgList").append($("<li class='rightMsg'>").html('<div><span>'+ msg +'</span></div>'))
+                }
+                $("#msgText").val('');
+            }
+
+
+
+            //上课中的突发情况检测
+            $("#gotoTestDev").on('click', function () {
+                $('.deviceCover,.alertOneTest').show();
+                $('#video_main').css({
+                    'position': 'fixed',
+                    'width': alertVideoWidth,
+                    'height': alertVideoWidth / VideoProportion + 40,
+                    'left': '50%',
+                    'top': '50%',
+                    'margin-left': -alertVideoWidth / 2 - 176,
+                    'margin-top': -alertVideoWidth / VideoProportion / 2,
+                    'z-index': 400
+                });
+            });
+
+            //刚开始隐藏白板，等待用户点击确认后 再显示白板
+            $("#MicroLanguage_WB").css({
+                'width': '0',
+                'height': '0'
+            });
+
+            /****************待确认，是否添加************************/
+            //隐藏课管窗口，只加载声音
+            $('#video_manager').css({
+                'width': 0,
+                'height': 0
+            });
+
+            $("#nowBegin").on('click', function () {
+                $("#MicroLanguage_WB").css({
+                    'width': '100%',
+                    'height': '100%'
+                })
+                initTeachLeft();
+                $('.deviceCover,.alertOneTest').hide();
+            })
+
+            function initTeachLeft() {
+
+                $(".mesWindow").css({
+                    'position': 'absolute',
+                    'right': 0,
+                    'top': 0,
+                    'margin': 0,
+                    'padding': 0,
+                    'width': iframeTextWidth,
+                    'height': winHeight - 50,
+                });
+
+                //初始白板盒子宽度
+                if (isRight) {
+                    $('.course,#MicroLanguage_WB').css({
+                        'width': winWidth - videoWidth,
+                        'height': winHeight - 50
+                    })
+                    $('.videoBox').css({
+                        'height': winHeight - 50,
+                        'width': videoWidth,
+                        'position': 'absolute'
+                    });
+                }
+                else {
+                    $('.course,#MicroLanguage_WB').css({
+                        'width': winWidth - iframeTextWidth - videoWidth,
+                        'height': winHeight - 50
+                    })
+                    $('.videoBox').css({
+                        'height': winHeight - 50,
+                        'width': videoWidth,
+                        'position': 'absolute'
+                    });
+                }
+
+                //顶部导航改变
+                $(".leftTitle").width($('#MicroLanguage_WB').width());
+                $(".rightTitle").width($('.classTop').width() - $(".leftTitle").width());
+
+                //设置盒子回到盒子
+                $('#video_slave').css({
+                    'position': 'absolute',
+                    'width': videoWidth,
+                    'height': videoHeight,
+                    'z-index': 40,
+                    'left': 0,
+                    'right': 0,
+                    'margin': 0
+                });
+                $('#video_main').css({
+                    'position': 'absolute',
+                    'width': videoWidth,
+                    'height': videoHeight + 40,
+                    'top': videoHeight,
+                    'z-index': 40,
+                    'left': 0,
+                    'right': 0,
+                    'margin': 0
+                });
+            }
+
+            //浏览器大小改变事件
+            window.onresize = function () {
+                findDimensions();
+                initTeachLeft();
+                initMsgWindow();
+            }
+
+            //课程时间 --倒计时
+            var minute = Math.floor(user_Time / 60);
+            var second = user_Time % 60;
+            var timer = setInterval(function () {
+                if (second) {
+                    second--;
+                }
+                else {
+                    minute--;
+                    second = 59;
+                }
+                $('#second').html((second < 10 ? '0' + second : second));
+                $('#minute').html((minute < 10 ? '0' + minute : minute));
+                if (minute == 5 && second == 0) {
+                    $('#alertTime').show().delay(1400).fadeOut();
+                    $('#surplus_Time').html('课程剩余5分钟');
+                }
+                if (minute == 3 && second == 0) {
+
+                    $('#alertTime').show().delay(1400).fadeOut();
+                    $('#surplus_Time').html('课程剩余3分钟');
+                }
+                if (minute == 0 && second == 3) {
+                    $('#alertTime').show().delay(3000).fadeOut();
+                    $('#surplus_Time').html('课程即将结束');
+                }
+                if (minute == 0 && second == 0) {
+                    clearInterval(timer);
+                    window.parent.location.href = window.parent.location.href;
+                }
+            }, 1000);
+            /*投诉*/
+            //投诉块
+            $('.complain').on('click', function () {
+                $('.mainCover').show();
+                $(".CoverContent").show();
+                $(".CoverContent ul li img").attr('src', 'img/checkbox.png');
+            });
+            $('.CoverContent ul li').on('click', function () {
+                if ($(this).find('img').attr('src') == 'img/checked.png') {
+                    $(this).attr('isChecked', 0);
+                    $(this).find('img').attr('src', 'img/checkbox.png');
+                }
+                else {
+                    $(this).attr('isChecked', 1);
+                    $(this).find('img').attr('src', 'img/checked.png');
+                }
+            })
+            var complainList = ['IsAbsent', 'NoVoice', 'IsLate', 'NoBook', 'AVState', 'HaveError', 'NoClear', 'NoBoard'];
+
+            //学生投诉事件
+            $("#submit").on('click', function () {
+                //绑定的文本信息(具体字段再调整)
+                var complainData = '';
+                $(".CoverContent li").each(function (index, el) {
+                    var isChecked = typeof ($(el).attr('isChecked'));
+                    isChecked = isChecked == 'string' ? 1 : 0;
+                    complainData += (',' + complainList[index] + ':' + isChecked);
+                });
+                var jsonStr = "sMethod=complain&jsonStr={studentId:" + studentId + ",LessonId:" + LessonId + complainData + "}";
+                console.log(jsonStr);
+                $.ajax({
+                    url: 'http://192.168.0.8/studentservice.ashx',
+                    data: jsonStr,
+                    type: "POST",
+                    success: function (data) {
+                        if (data.result == 1) {
+                            $('.CoverContent').stop().hide();
+                            $(".successCover").stop().show().delay(1000).hide(0, function () {
+                                $('.mainCover').stop().hide();
+                            });
+                        } else {
+                            console.log('ajax错误');
+                        }
+                    }
+                })
+            });
+            $('#cancel').on('click', function () {
+                $('.CoverContent').stop().hide();
+                $('.mainCover').stop().hide();
+            });
+
+            initTeachLeft();
+
+            //视频窗口左右移动事件
+            var rightToggle = true;
+            $("#toggle").on('click', function () {
+                if (rightToggle) {
+                    $('.videoBox').animate({
+                        'right': 0
+                    }, 400);
+                    $('#toggle img').prop('src', 'img/left.png');
+                }
+                else {
+                    $('.videoBox').animate({
+                        'right': 200
+                    }, 400);
+                    $('#toggle img').prop('src', 'img/right.png');
+                }
+                rightToggle = !rightToggle;
+                isRight = !isRight;
+                initTeachLeft();
+            });
+        }
+
+        //传当前高度到父层
+        function dyjustifyframe() {
+            //console.log(winHeight);
+            window.parent.postMessage(winHeight, "*");
+        }
+    </script>
+</body>
+</html>

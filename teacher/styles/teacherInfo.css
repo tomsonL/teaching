@@ -1,0 +1,658 @@
+/*普通个人页样式*/
+.personal_con_normal {
+    width: 614px;
+    padding: 0 150px 0 36px;
+    display: block;
+}
+
+/*头像介绍部分样式*/
+.personal_con_normal .personal_header .avatar_box {
+    width: 100px;
+    height: 100px;
+    margin: 20px auto 10px;
+    position: relative;
+}
+
+.personal_con_normal .personal_header .avatar {
+    width: 102px;
+    height: 102px;
+    border-radius: 50%;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.personal_con_normal .personal_header .defaultpic {
+    width: 102px;
+    position: absolute;
+}
+
+.personal_con_normal .personal_header .mark {
+    width: 24px;
+    height: 24px;
+    position: absolute;
+    right: -8px;
+    bottom: 8px;
+}
+
+.personal_con_normal .personal_header .change_btn {
+    margin: 0 auto;
+    text-align: center;
+}
+
+.personal_con_normal .personal_header .change_btn a {
+    display: inline-block;
+    height: 22px;
+    line-height: 22px;
+    border-radius: 11px;
+    padding: 0 10px;
+    background: #0fa6ee;
+    color: #fff;
+    font-size: 12px;
+}
+
+.personal_con_normal .personal_header .change_btn a img {
+    padding-right: 5px;
+    width: 14px;
+}
+
+.personal_con_normal .personal_header .name {
+    display: inline-block;
+    height: 50px;
+    line-height: 50px;
+    margin: 0 20px;
+}
+
+.personal_con_normal .personal_header .name span {
+    margin-left: 10px;
+}
+
+.personal_con_normal .personal_header .name img {
+    margin-left: 10px;
+    height: 14px;
+}
+
+.personal_con_normal .personal_header .teacher_info {
+    width: 540px;
+    margin: 10px auto;
+    border-left: 1px solid #ccc;
+    overflow: visible;
+}
+
+.personal_con_normal .personal_header .teacher_info .biglist {
+    position: relative;
+    margin-top: 14px;
+    margin-left: -30px;
+    height: 80px;
+    border-radius: 42px;
+    border: 1px solid #ccc;
+    background: #fafafa;
+}
+
+.personal_con_normal .personal_header .teacher_info .biglist img {
+    width: 84px;
+    position: absolute;
+    left: -16px;
+    top: -2px;
+}
+
+.personal_con_normal .personal_header .teacher_info .biglist .text_box {
+    position: relative;
+    margin-left: 90px;
+    padding: 10px 10px 0 0;
+}
+
+.personal_con_normal .personal_header .teacher_info .biglist .text_box p {
+    font-size: 14px;
+}
+
+.personal_con_normal .personal_header .teacher_info .biglist .text_box a {
+    color: #8b8b8b;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.personal_con_normal .personal_header .teacher_info .smalllist {
+    position: relative;
+    margin-top: 14px;
+    margin-left: -10px;
+    height: 34px;
+    line-height: 34px;
+    border-radius: 17px;
+    border: 1px solid #ccc;
+    background: #fafafa;
+}
+
+.personal_con_normal .personal_header .teacher_info .smalllist img {
+    width: 38px;
+    position: absolute;
+    left: -12px;
+    top: -2px;
+}
+
+.personal_con_normal .personal_header .teacher_info .smalllist p {
+    position: relative;
+    margin-left: 50px;
+}
+
+.personal_con_normal .personal_header .teacher_info .smalllist p span {
+    position: absolute;
+    left: 160px;
+    top: 0;
+    color: #8b8b8b;
+    margin-left: 50px;
+    font-size: 12px;
+}
+
+/*资料页公共样式*/
+.personal_con_normal .common .title {
+    height: 35px;
+    line-height: 35px;
+    border-bottom: 1px solid #0fa6ee;
+    font-size: 14px;
+}
+
+.personal_con_normal .common .title img {
+    width: 20px;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
+/*学生评分样式*/
+.personal_con_normal .rating .rating_box {
+}
+
+.personal_con_normal .rating .rating_box .con {
+    margin: 0 auto;
+    height: 200px;
+}
+
+.personal_con_normal .rating .rating_box .con .top {
+    height: 80px;
+    text-align: center;
+}
+
+.personal_con_normal .rating .rating_box .con .top span {
+    color: #0ea6ef;
+    font-size: 16px;
+    font-weight: bolder;
+    line-height: 80px;
+    margin-right: 10px;
+}
+
+.personal_con_normal .rating .rating_box .con .bottom {
+    text-align: center;
+}
+
+.personal_con_normal .rating .rating_box .con .bottom .judge_list {
+    width: 680px;
+    height: 100px;
+    margin: 0 auto;
+}
+
+.personal_con_normal .rating .rating_box .con .bottom .judge_list li {
+    list-style: none;
+    float: left;
+    width: 138px;
+    height: 32px;
+    border: 1px solid #bbb;
+    border-radius: 16px;
+    line-height: 32px;
+    margin: 0 25px 17px 0;
+    font-size: 14px;
+}
+
+/*课程记录样式*/
+.personal_con_normal .records .records_box {
+    margin: 20px 0;
+    margin-bottom: 120px;
+}
+
+.personal_con_normal .records .records_box .records_num {
+    height: 34px;
+    line-height: 34px;
+    font-size: 14px;
+    text-align: center;
+    color: #0fa6ee;
+    letter-spacing: 2px;
+    margin: 10px 0;
+}
+
+.personal_con_normal .records .records_box .records_num img {
+    width: 20px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.personal_con_normal .records .records_box .date_choice {
+    font-size: 12px;
+}
+
+.personal_con_normal .records .records_box .date_choice .date_left {
+    float: left;
+}
+
+.personal_con_normal .records .records_box .date_choice .date_left input[value=Search] {
+    border-radius: 11px;
+    border: none;
+    width: 70px;
+    height: 24px;
+    line-height: 22px;
+    color: #fff;
+    background: #0fa6ee;
+    margin-left: 16px;
+}
+
+.personal_con_normal .records .records_box .date_choice .date_left #class-records-search {
+    cursor: pointer;
+}
+
+.personal_con_normal .records .records_box .date_choice .date_right {
+    float: right;
+    font-size: 14px;
+    line-height: 24px;
+}
+
+.personal_con_normal .records .records_box .date_choice .date_right label {
+    cursor: pointer;
+}
+
+.personal_con_normal .records .records_box .date_choice .date_right input {
+    cursor: pointer;
+}
+
+.personal_con_normal .records .records_box .class_table {
+    margin: 14px 0;
+    width: 600px;
+}
+
+.personal_con_normal .records .records_box .class_table .table_head th {
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    background: #eee;
+}
+
+.personal_con_normal .records .records_box .class_table .table_head .left_head {
+    border-radius: 10px 0 0 10px;
+    background: #eee;
+}
+
+.personal_con_normal .records .records_box .class_table .table_head .right_head {
+    border-radius: 0 10px 10px 0;
+    background: #eee;
+}
+
+.personal_con_normal .records .records_box .class_table .table_body td {
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border-bottom: 1px solid #bbb;
+    font-size: 12px;
+}
+
+.personal_con_normal .records .records_box .class_table .table_body .no_comment, .personal_con_normal .records .records_box .class_table .table_body .student_no_com {
+    color: #c40000;
+    cursor: pointer;
+}
+
+.personal_con_normal .records .records_box .class_table .table_body .commented, .personal_con_normal .records .records_box .class_table .table_body .student_com {
+    color: green;
+    cursor: pointer;
+}
+
+/*头像介绍部分样式*/
+.personal_con_change .personal_header {
+    height: 256px;
+}
+
+.personal_con_change .personal_header .avatar_box {
+    width: 100px;
+    height: 100px;
+    margin: 54px auto 0;
+    position: relative;
+}
+
+.personal_con_change .personal_header .avatar {
+    width: 102px;
+    height: 102px;
+    border-radius: 50%;
+    margin: 54px auto 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.personal_con_change .personal_header .defaultpic {
+    width: 102px;
+    position: absolute;
+}
+
+.personal_con_change .personal_header .mark {
+    width: 24px;
+    height: 24px;
+    position: absolute;
+    right: -8px;
+    bottom: 8px;
+}
+
+.personal_con_change .personal_header .name {
+    text-align: center;
+    height: 50px;
+    line-height: 50px;
+}
+
+.personal_con_change .personal_header .name span {
+    margin-left: 10px;
+}
+
+.personal_con_change .personal_header .name img {
+    margin-left: 10px;
+    height: 14px;
+}
+
+.personal_con_change .personal_header textarea {
+    width: 450px;
+    height: 58px;
+    line-height: 16px;
+    font-size: 12px;
+    padding: 10px;
+    resize: none;
+    display: block;
+    margin: 0 auto;
+}
+
+/*资料页公共样式*/
+
+.personal_con_change .common .title {
+    height: 35px;
+    line-height: 35px;
+    border-bottom: 1px solid #0fa6ee;
+    font-size: 14px;
+}
+
+.personal_con_change .common .title img {
+    width: 20px;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
+.personal_con_change .basic .info li {
+    width: 300px;
+    height: 28px;
+    line-height: 20px;
+    position: relative;
+}
+
+.personal_con_change .basic .info li div {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.personal_con_change .basic .info li div input {
+    width: 120px;
+}
+
+.personal_con_change .basic .info li div select {
+    width: 124px;
+}
+
+.personal_con_change .basic .info li div input[type=radio] {
+    width: 20px;
+    margin-left: 20px;
+}
+
+
+.personal_con_change .inde .float_wrap .right ul {
+    padding-left: 30px;
+}
+
+.personal_con_change .inde .float_wrap .right li {
+    position: relative;
+    width: 350px;
+    height: 28px;
+    line-height: 20px;
+    font-size: 12px;
+}
+
+.personal_con_change .inde .float_wrap .right li div {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+
+.personal_con_change .edu .float_wrap .right ul {
+    padding-left: 30px;
+}
+
+.personal_con_change .edu .float_wrap .right li {
+    position: relative;
+    width: 350px;
+    height: 28px;
+    line-height: 20px;
+    font-size: 12px;
+}
+
+.personal_con_change .edu .float_wrap .right li div {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.personal_con_change .edu .float_wrap .right li div input {
+    width: 150px;
+}
+
+.personal_con_change .edu .float_wrap .right li div select {
+    width: 154px;
+}
+
+
+.personal_con_change .submit input {
+    border-radius: 12px;
+    border: none;
+    width: 70px;
+    height: 24px;
+    font-size: 14px;
+    background: #0fa6ee;
+    color: #fff;
+    cursor: pointer;
+}
+
+.personal_con_change .submit input[value=Cancel] {
+    margin-left: 252px;
+}
+
+.personal_con_change .submit input[value=Submit] {
+    margin-left: 20px;
+}
+
+/*头像介绍部分样式*/
+.personal_con_first .personal_header {
+    height: 256px;
+}
+
+.personal_con_first .personal_header .avatar_box {
+    width: 100px;
+    height: 100px;
+    margin: 54px auto 0;
+    position: relative;
+}
+
+.personal_con_first .personal_header .avatar {
+    width: 102px;
+    height: 102px;
+    border-radius: 50%;
+    margin: 54px auto 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.personal_con_first .personal_header .defaultpic {
+    width: 102px;
+    position: absolute;
+}
+
+.personal_con_first .personal_header .mark {
+    width: 24px;
+    height: 24px;
+    position: absolute;
+    right: -8px;
+    bottom: 8px;
+}
+
+.personal_con_first .personal_header .name {
+    text-align: center;
+    height: 50px;
+    line-height: 50px;
+}
+
+.personal_con_first .personal_header textarea {
+    width: 450px;
+    height: 58px;
+    line-height: 16px;
+    font-size: 12px;
+    padding: 10px;
+    resize: none;
+    display: block;
+    margin: 0 auto;
+}
+
+
+.personal_con_first .common .title {
+    height: 35px;
+    line-height: 35px;
+    border-bottom: 1px solid #0fa6ee;
+    font-size: 14px;
+}
+
+.personal_con_first .common .title img {
+    width: 20px;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+.personal_con_first .basic .info li {
+    width: 300px;
+    height: 28px;
+    line-height: 20px;
+    position: relative;
+}
+
+.personal_con_first .basic .info li div {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.personal_con_first .basic .info li div input {
+    width: 120px;
+}
+
+.personal_con_first .basic .info li div select {
+    width: 124px;
+}
+
+.personal_con_first .basic .info li div input[type=radio] {
+    width: 20px;
+    margin-left: 20px;
+}
+
+.personal_con_first .inde .float_wrap .right ul {
+    padding-left: 30px;
+}
+
+.personal_con_first .inde .float_wrap .right li {
+    position: relative;
+    width: 350px;
+    height: 28px;
+    line-height: 20px;
+    font-size: 12px;
+}
+
+.personal_con_first .inde .float_wrap .right li div {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.personal_con_first .edu .float_wrap .right ul {
+    padding-left: 30px;
+}
+
+.personal_con_first .edu .float_wrap .right li {
+    position: relative;
+    width: 350px;
+    height: 28px;
+    line-height: 20px;
+    font-size: 12px;
+}
+
+.personal_con_first .edu .float_wrap .right li div {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.personal_con_first .edu .float_wrap .right li div input {
+    width: 150px;
+}
+
+.personal_con_first .edu .float_wrap .right li div select {
+    width: 154px;
+}
+
+
+.personal_con_first .submit input {
+    border-radius: 12px;
+    border: none;
+    width: 70px;
+    height: 24px;
+    margin-left: 272px;
+    font-size: 14px;
+    background: #0fa6ee;
+    color: #fff;
+    cursor: pointer;
+}
+
+/*分页样式*/
+.page {
+    position: relative;
+    margin-top: 30px;
+}
+
+.page ul {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.page li {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #ccc;
+    border-radius: 15px;
+    list-style: none;
+    float: left;
+    line-height: 30px;
+    text-align: center;
+    font-size: 12px;
+    font-family: "微软雅黑";
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.page img {
+    margin: 10px 1px 0 0;
+}
+
+
+.first_password {
+    text-align: right;
+    padding-right: 10px;
+    line-height: 32px;
+}
+
+.editpassword {
+    margin-bottom: 3px;
+}

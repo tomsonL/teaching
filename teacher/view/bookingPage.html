@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" href="styles/reset.css">
+	<link rel="stylesheet" href="styles/global.css">
+	<link rel="stylesheet" href="styles/calendarSmall.css">
+	<script src="scripts/calendar.js"></script>
+</head>
+<body>
+	<div id="main">
+		<div id="article">
+			<link rel="stylesheet" href="styles/calendarSmall.css">
+			<script src="scripts/calendar.js"></script>
+			<style type="text/css">
+				.booking_con{
+					width:705px;
+					padding:0 75px 0 20px;
+				}
+				/*资料页公共样式*/
+				.common .title{
+					height:35px; 	`
+					line-height:35px;
+					border-bottom:1px solid #ccc;
+					font-size:14px;
+				}
+				.common .title img{
+					width:20px;
+					vertical-align: middle;
+					margin-right:10px;
+				}
+				/*左侧表格样式*/
+				.booking .left_box{
+					float:left;
+				}
+				.booking .left_box p{
+					margin:10px 0;
+					font-size:20px;
+				}
+				.booking .left_box p span{
+					font-size:14px;
+					margin-left:10px;
+				}
+				.booking .booking_table{
+					width:424px;
+					font-size:12px;
+				}
+				.booking .booking_table thead th{
+					height:20px;
+					line-height:20px;
+					text-align:center;
+					background:#0fa6ee;
+					color:#fff;
+					width:160px;
+				}
+				.booking .booking_table thead .booking_time{
+					width:60px;
+				}
+				.booking .booking_table thead .booking_lesson{
+					width:244px;
+				}
+				.booking .booking_table thead .booking_student{
+					width:60px;
+				}
+				.booking .booking_table thead .booking_class{
+					width:60px;
+				}
+				.booking .booking_table tbody tr{
+					height:30px;
+					line-height:30px;
+					text-align:center;
+					border-bottom:1px solid #bbb;
+					font-size:12px;
+					color:#000;
+				}
+				.booking .booking_table tbody tr .name{
+					margin-left: 4px;
+					text-decoration: underline;
+					color:#6cbff2;
+				}
+				.booking .booking_table tbody tr td:first-child{
+					color:#bbb;
+				}
+				.booking .booking_table tbody .pick{
+					display:inline-block;
+					background:#0fa6ee;
+					color:#fff;
+					border-radius: 10px;
+					height:20px;
+					line-height:20px;
+					width:40px;
+				}
+				.booking .booking_table tbody .ban{
+					display:inline-block;
+					background:#ccc;
+					color:#fff;
+					border-radius: 10px;
+					height:20px;
+					line-height:20px;
+					width:40px;
+				}
+				/*右侧日历*/
+				.booking .right_box{
+					float:left;
+					width:240px;
+					margin:20px 0 0 20px;
+					height:300px;
+				}
+				#calender{
+					width: 262px;
+				}
+			</style>
+
+			<div class="booking_con">
+				<!--上课页开始-->
+				<div class="booking common clearfix">
+					<p class="title"><img src="images/icons/bookingCalendarIcon.png"/>Booking Calendar</p>
+					<div class="left_box">
+						<p>19th,June,2011<span>Monday</span></p>
+						<table class="booking_table">
+							<thead>
+								<tr>
+									<th class="booking_time">Time</th>
+									<th class="booking_lesson">Lesson</td>
+									<th class="booking_student">Student</td>
+									<th class="booking_class">Class</td>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>08:30</td>
+									<td>Cambridge English 1 Class 8<a class="name" href="javascript:;">Materials</a></td>
+									<td>刘瑞阳</td>
+									<td>
+										<a class="pick" href="javascript:;">Start</a>
+									</td>
+								</tr>
+								<tr>
+									<td>08:30</td>
+									<td>Cambridge English 1 Class 8<a class="name" href="javascript:;">Materials</a></td>
+									<td>刘瑞阳</td>
+									<td>
+										<a class="ban" href="javascript:;">Start</a>
+									</td>
+								</tr>
+								<tr>
+									<td>08:30</td>
+									<td>Cambridge English 1 Class 8<a class="name" href="javascript:;">Materials</a></td>
+									<td>刘瑞阳</td>
+									<td>
+										<a class="ban" href="javascript:;">Start</a>
+									</td>
+								</tr>
+								<tr>
+									<td>08:30</td>
+									<td>Cambridge English 1 Class 8<a class="name" href="javascript:;">Materials</a></td>
+									<td>刘瑞阳</td>
+									<td>
+										<a class="ban" href="javascript:;">Start</a>
+									</td>
+								</tr>
+								<tr>
+									<td>08:30</td>
+									<td>Cambridge English 1 Class 8<a class="name" href="javascript:;">Materials</a></td>
+									<td>刘瑞阳</td>
+									<td>
+										<a class="ban" href="javascript:;">Start</a>
+									</td>
+								</tr>
+								<tr>
+									<td>08:30</td>
+									<td>Cambridge English 1 Class 8<a class="name" href="javascript:;">Materials</a></td>
+									<td>刘瑞阳</td>
+									<td>
+										<a class="ban" href="javascript:;">Start</a>
+									</td>
+								</tr>
+								<tr>
+									<td>08:30</td>
+									<td>Cambridge English 1 Class 8<a class="name" href="javascript:;">Materials</a></td>
+									<td>刘瑞阳</td>
+									<td>
+										<a class="ban" href="javascript:;">Start</a>
+									</td>
+								</tr>
+								<tr>
+									<td>08:30</td>
+									<td>Cambridge English 1 Class 8<a class="name" href="javascript:;">Materials</a></td>
+									<td>刘瑞阳</td>
+									<td>
+										<a class="ban" href="javascript:;">Start</a>
+									</td>
+								</tr>
+								<tr>
+									<td>08:30</td>
+									<td>Cambridge English 1 Class 8<a class="name" href="javascript:;">Materials</a></td>
+									<td>刘瑞阳</td>
+									<td>
+										<a class="ban" href="javascript:;">Start</a>
+									</td>
+								</tr>
+								<tr>
+									<td>08:30</td>
+									<td>Cambridge English 1 Class 8<a class="name" href="javascript:;">Materials</a></td>
+									<td>刘瑞阳</td>
+									<td>
+										<a class="ban" href="javascript:;">Start</a>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="right_box">
+						<div id="calendar" class="calendar"></div>
+					</div>
+					
+				</div>
+				<!--上课页结束-->
+			</div>
+
+			<script type="text/javascript">
+				var calender = new Calendar(document.getElementById('calendar'));
+				new Calendar(document.getElementById('calendar'));
+			</script>
+		</div>
+	</div>
+</body>
+</html>

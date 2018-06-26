@@ -1,0 +1,121 @@
+*{
+    margin:0;
+    padding:0;
+}
+#trial{
+    display: none;
+}
+#trial div .category{
+    font-weight: bold;
+    font-size: 18px;
+}
+.category{
+    margin:0;
+}
+#trial div.tril_page{
+    display: none;
+    height: 470px;
+    overflow-y: auto;
+}
+#trial div.tril_page textarea{
+    width:580px;
+    display: block;
+    margin-top:10px;
+    outline: none;
+    padding:10px;
+    resize:none;
+    border-radius:10px;
+    border:1px solid #ccc;
+    height: 90px;
+}
+ul,li,i{
+    list-style: none;
+    overflow: hidden;
+    font-style: normal;
+}
+#trial ul{
+    margin-top:4px;
+}
+#trial li{
+    margin-bottom: 3px;
+    min-height: 24px;
+    line-height: 24px;
+}
+#trial li label{
+    float: right;
+    width: 100%;
+    cursor: pointer;
+}
+#trial li input{
+    float: left;
+    vertical-align: middle;
+    cursor: pointer;
+    width: 3%;
+    margin-top:8px;
+    margin-right: 1%;
+}
+#trial li i{
+    float: left;
+    width: 93%;
+}
+#trial .btnControl{
+    text-align: center;
+    /*margin-top:40px;*/
+}
+#trial .btnControl button{
+    height: 28px;
+    line-height: 26px;
+    border-radius:15px;
+    margin:0 10px;
+    font-size: 18px;
+    width: 90px;
+    cursor: pointer;
+    color:#fff;
+    outline: none;
+    background-color: #08bbf2;
+    border:0;
+}
+
+#checkTrialContent{
+    height: 440px;
+    overflow-y:auto;
+    margin-top:10px;
+}
+#checkTrialContent li:first-child{
+    margin-top:0 !important;
+}
+#checkTrialContent li{
+    width: 460px;
+    border-radius:10px;
+    border:4px dashed #ff8f94;
+    padding:10px 24px;
+    margin-top: 30px;
+}
+#checkTrialContent .trialTitle{
+    height: 30px;
+    line-height: 30px;
+    padding-bottom: 10px;
+    border-bottom: 2px dashed #ff8f94;
+    margin-bottom: 10px;
+}
+#checkTrialContent .trialItem{
+    min-height: 30px;
+    line-height: 30px;
+}
+.checkTrialBtns{
+    text-align: center;
+    padding-top:30px;
+}
+.checkTrialBtns button{
+    height: 28px;
+    line-height: 26px;
+    border-radius:15px;
+    margin:0 10px;
+    font-size: 18px;
+    width: 90px;
+    cursor: pointer;
+    color:#fff;
+    outline: none;
+    background-color: #08bbf2;
+    border:0;
+}

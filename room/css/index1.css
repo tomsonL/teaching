@@ -1,0 +1,580 @@
+
+		html,body{
+			font-family:'微软雅黑';
+			font-size: 14px;
+			color:#000;
+			width: 100%;
+			height: 100%;
+			min-width: 1024px;
+		}
+		.classMain{
+			width:100%;
+			height:100%;
+			position: relative;
+		}
+
+		/*顶部*/
+		.classTop{
+			width: 100%;
+			height:50px;
+			line-height: 50px;
+			background-color: #eeeeee;
+		}
+		.rightTitle span{
+			display: inline-block;
+			height:50px;
+			line-height: 50px;
+			margin-right: 20px;
+			cursor: pointer;
+			padding-left:20px;
+		}
+		.debug{
+			background: url(../img/setBtn.png) no-repeat center left;
+			position: relative;
+			padding-left:20px;
+			display: inline-block;
+			width: 100px;
+			text-align: left;
+		}
+		.debugDiv{
+			display: none;
+			position: absolute;
+			width: 242px;
+			height: 150px;
+			z-index: 999;
+			top:45px;
+			left:-60px;
+			background-image: url(../img/debugDiv.png);
+		}
+		.debugDiv ul{
+			margin-top:20px;
+			overflow: hidden;
+			height: 130px;
+		}
+		.debugDiv ul li{
+			line-height: 20px;
+			text-align: left;
+			width: 94%;
+			padding-left:6%;
+		}
+		.debugDiv ul li img{
+			display: inline-block;
+			margin-right: 6px;
+		}
+		.debugDiv ul li .debugMsg{
+			width:90%;
+			padding-left: 10%;
+			line-height: 14px;
+			font-size: 14px;
+		}
+		.complain{
+			background: url(../img/warning.png) no-repeat center left;
+		}
+
+		.classTop .leftTitle{
+			float: left;
+			width:67%;
+			height: 100%;
+		}
+		.classTop .rightTitle{
+			float: right;
+			width: 33%;
+			height: 100%;
+			color: #888;
+			text-align: right;
+		}
+		.classTitle{
+			float: left;
+			margin-left:20px;
+		}
+		.classTime{
+			float: right;
+			margin-right:20px;
+		}
+		
+		/*课件*/
+		.course{
+			float: left;
+			width: 67%;
+			background-color: #f2f2f2;
+			position: relative;
+		}
+		.course .courseContent{
+			width: 100%;
+			height: 100%;
+			position: relative;
+		}
+		.whiteCover{
+			width:100%;
+			height:100%;
+			background-color: #fff;
+			position: absolute;
+			left: 0;
+			top:0;
+			z-index: 60;
+			display: none;
+		}
+		.course .courseBtn{
+			font-size: 17px;
+			color:#000;
+			width: 200px;
+			height: 60px;
+			line-height: 60px;
+			background-color: transparent;
+			position: absolute;
+			z-index: 10;
+			left: 100px;
+			bottom:0;
+			cursor: pointer;
+		}
+		.recording{
+			width:20px;
+			height: 20px;
+			margin-left:20px;
+			display: inline-block;
+			vertical-align: middle;
+			background-image: url(../img/recording.png);
+		}
+		.CAI{
+			position: relative;
+			cursor: pointer;
+			width:120px;
+			height: 22px;
+			line-height: 22px;
+			bottom:0px;
+			padding-left:22px;
+			z-index: 600;
+			display: inline-block;
+			vertical-align: middle;
+			background: url(../img/CAI.png) no-repeat center left;
+		}
+		.CAI .CAIDiv{
+			position: absolute;
+			bottom:20px;
+			left: -10px;
+			width: 168px;
+			height: 252px;
+			background: url(../img/CAIDiv.png) no-repeat center center;
+			-webkit-background-size: cover;
+			background-size: cover;
+			display: none;
+
+			z-index: 101;
+		} 
+		.CAI .CAIDiv ul{
+			width: 100%;
+			height: 230px;
+			overflow: auto;
+			position: absolute;
+			bottom:20px;
+			z-index: 102;
+		}
+		.CAI .CAIDiv #sel {
+            width: 100%;
+        }
+		.CAI .CAIDiv #sel li{
+			line-height: 16px;
+			width:100%;
+			height: 20px;
+			margin-top:2px;
+			font-size: 16px;
+			overflow: hidden;
+			white-space: nowrap;
+		}
+		.CAI .CAIDiv li span{
+			display: inline-block;
+			font-size: 14px;
+			white-space: nowrap;
+		}
+		.CAI .CAIDiv li img{
+			float: left;
+			vertical-align: middle;
+			margin:0 6px;
+		}
+		.CAI .CAIDiv li .imgRight{
+			float: right;
+			vertical-align: middle;
+			margin-top:6px;
+		}
+
+		/*右边窗口*/
+		.rightWindow{
+			float: right;
+			width:218px;
+			position: relative;
+		}
+		.rightWindow .teachDiv{
+			width: 100%;
+			height:64%;
+			position: relative;
+		}
+		.teacherDiv{
+			width: 100%;
+			height: 60%;
+			position: absolute;
+			top: 0;
+			left: 0;
+		}
+		.closeDiv{
+			position: absolute;
+			bottom:-24px;
+			left:0;
+			height:24px;
+			width: 100%;
+		}
+		.closeDiv .apcityCover{
+			background-color: #000;
+			opacity: 0.4;
+			height: 24px;
+			width: 100%;
+			position: absolute;
+			bottom: 0;
+		}
+		.closeDiv .closeBtn{
+			position: absolute;
+			left:6px;
+			line-height: 20px;
+			font-size: 14px;
+			color:#fff;
+			height: 24px;
+			cursor: pointer;
+		}
+		.closeDiv .closeBtn span{
+			display: inline-block;
+			width:20px;
+			height: 24px;
+			font-size: 20px;
+			line-height: 24px;
+			text-align: center;
+			vertical-align:bottom;
+		}
+		.teacherAudio{
+			width: 100%;
+			height: 100%;
+			position: absolute;
+			top:0;
+			z-index: 20;
+		}
+		.magnify{
+			width:20px;
+			height: 20px;
+			position: absolute;
+			top: 10px;
+			right:10px;
+			z-index: 100;
+			background-image: url(../img/magnify.png);
+			cursor: pointer;
+		}
+		.magnify.shrink{
+			background-image: url(../img/shrink.png);
+		}
+		.studentDiv{
+			position: absolute;
+			left:0;
+			bottom:0;
+			width:70%;
+			height:40%;
+			overflow: hidden;
+		}
+		.studentAudio{
+			position: absolute;
+			right:0;
+			bottom:0;
+			width:100%;
+			height:100%;
+			box-sizing:border-box;
+			text-align: center;
+			font-size: 30px;
+			font-weight: bold;
+			background-color: transparent;
+		}
+
+
+		.rightWindow .audioBtn{
+			width: 100%;
+			height:10%;
+			bottom:0;
+		}
+		.rightWindow .mesWindow{
+			width: 100%;
+			background-color: #fff;
+			position: absolute;
+		}
+		.mainCover{
+			width:100%;
+			height: 100%;
+			position: absolute;
+			left: 0;
+			top:0;
+			z-index: 61;
+			display: none;
+		}
+		.CoverApcity{
+			width:100%;
+			height: 100%;
+			position: absolute;
+			left: 0;
+			top:0;
+			background-color: #000;
+			z-index: 61;
+			opacity:0.3;
+		}
+		.CoverContent{
+			width:400px;
+			height:300px;
+			background-color: #fff;
+			position: absolute;
+			left: 50%;
+			margin-left:-20%;
+			top:20%;
+			z-index: 62;
+		}
+		.CoverContent p{
+			text-align: center;
+			height:40px;
+			font-size: 20px;
+			line-height:60px;
+		}
+		.CoverContent ul{
+			overflow: hidden;
+			margin:10px auto;
+		}
+		.CoverContent ul li{
+			float: left;
+			width:30%;
+			height: 20px;
+			padding:6px 10%;
+			margin-top:10px;
+			font-size: 16px;
+			color:#000;
+			line-height: 20px;
+			text-align: left;
+			overflow: hidden;
+			cursor: pointer;
+		}
+		.CoverContent ul li img{
+			display: inline-block;
+			margin-right:6px;
+			vertical-align: middle;
+			margin-bottom: 4px;
+			width:18px;
+			height: 18px;
+		}
+		
+		.CoverFooter{
+			width:100%;
+			height:30px;
+			margin-top:30px;
+			text-align: right;
+		}
+		.CoverFooter a{
+			color:#fff;
+			display: inline-block;
+			width:70px;
+			background-color: #2e95cf;
+			height: 30px;
+			text-align: center;
+			line-height: 30px;
+			text-decoration: none;
+			border-radius: 6px;
+			margin-right: 10%;
+		}
+		.voiceBox{
+            width:200px;
+            margin:30px auto;
+            height: 4px;
+            background-color: #555;
+            position: relative;
+        }
+        .voicePos{
+            width:10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #000;
+            position: absolute;
+            top:-3px;
+            left: 0;
+            cursor:pointer;
+        }
+        .testNav .btn{
+            display: inline-block;
+            width:100px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            color:#08bbf2;
+            border:0;
+            background-color: #fff;
+            border:1px solid #08bbf2;
+            border-radius: 4px;
+            margin:0 20px;
+        }
+        .testNav .btn.active{
+            background-color: #08bbf2;
+            color:#fff;
+        }
+        .alertOneTest{
+            width: 660px;
+            height: 330px;
+            position: fixed;
+            left: 50%;
+            top:50%;
+            margin-left:-330px;
+            margin-top: -165px;
+            background-color: #fff;
+            box-shadow: 0 0 10px #000;
+            z-index: 200;
+        }
+        .fl{
+            float: right;
+            width: 340px;
+            height: 330px;
+        }
+        .selectDevice{
+            display: inline-block;
+            width:220px;
+            margin:6px;
+            height: 22px;
+        }
+        .fl i{
+            font-style: normal;
+            color:green;
+        }
+        .fl p{
+            font-size: 16px;
+            height:37px;
+            line-height: 17px;
+        }
+        .selD{
+            margin-top: 6px;
+        }
+        .deviceCover{
+            position: fixed;
+            width:100%;
+            height: 100%;
+            background-color: #000;
+            opacity: 0.3;
+            z-index: 150;
+        }
+        #nowBegin{
+            display: block;
+            width: 130px;
+            height: 34px;
+            background-color: #ff6600;
+            color:#fff;
+            font-size: 16px;
+            line-height: 34px;
+            text-align: center;
+            border-radius: 6px;
+            margin:10px auto;
+        }
+        #nowBegin.dis{
+            background-color: #ccc;
+        }
+		
+		#toggle{
+			position: absolute;
+        	top:50%;
+        	width:50px;
+        	height: 50px;
+        	margin-top:-45px;
+        	left:-25px;
+        	color:#fff;
+        	text-align: left;
+        	line-height: 50px;
+        	cursor: pointer;
+		}
+		#toggle img{
+			position: absolute;
+			left: 0;
+			top:50%;
+			height:30px;
+			margin-top:-15px;
+			left:10px;
+		}
+        #toggle span{
+        	display: inline-block;
+        	border-radius: 50%;
+        	opacity: 0.3;
+        	filter:alpha(opacity:30);
+        	width:50px;
+        	height: 50px;
+        	background-color: #000;
+        	cursor: pointer;
+        }
+	
+        /* 20160524 21:45*/
+        .leaveClass{
+        	position: fixed;
+        	width:400px;
+        	height:160px;
+        	top:50%;
+        	left:50%;
+        	margin-left:-150px;
+        	margin-top:-80px;
+        	background-color: #fff;
+        	z-index: 300;
+        	display: none;
+			
+        }
+        .closeConfirm{
+        	font-size: 22px;
+        	position: absolute;
+        	right: 10px;
+        	top: 6px;
+        	cursor: pointer;
+        }
+        .confirm{
+        	height: 100px;
+        	text-align: center;
+        	line-height: 100px;
+        	font-size: 16px;
+        }
+        .confirmBtn{
+        	width:260px;
+        	margin:0px auto;
+        }
+        .confirmBtn a{
+        	display: inline-block;
+        	border:1px solid #08bbf2;
+        	width:60px;
+        	color:#08bbf2;
+        	text-align: center;
+        	line-height: 20px;
+        	margin:0 30px;
+        }
+        .confirmBtn a.active{
+        	background-color: #08bbf2;
+        	color:#fff;
+        }
+		
+		#toggle{
+			position: absolute;
+        	top:50%;
+        	width:50px;
+        	height: 50px;
+        	margin-top:-45px;
+        	left:-30px;
+        	color:#fff;
+        	text-align: left;
+        	line-height: 50px;
+        	cursor: pointer;
+		}
+		#toggle img{
+			position: absolute;
+			left: 0;
+			top:50%;
+			height:24px;
+			margin-top:-12px;
+			left:14px;
+		}
+        #toggle span{
+        	display: inline-block;
+        	border-radius: 50%;
+        	opacity: 0.3;
+        	filter:alpha(opacity:30);
+        	width:50px;
+        	height: 50px;
+        	background-color: #000;
+        	cursor: pointer;
+        }

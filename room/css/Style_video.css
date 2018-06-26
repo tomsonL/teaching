@@ -1,0 +1,170 @@
+/* CSS file */
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+mx|Application
+{
+	fontSize: 12;
+	fontFamily: 微软雅黑;
+}
+
+mx|ToolTip
+{
+	font-family:            微软雅黑;
+	font-size:              12;
+	background-color:       #FFFFFF;
+	background-alpha:       1;
+	cornerRadius:           0;
+	borderStyle:			solid;
+	borderThickness:		2;
+}
+
+mx|Button.net_good
+{
+	skin: Embed(source="assets/skins/transparent.png");
+	icon: Embed(source="assets/icons/net_good.png");
+}
+
+mx|Button.net_bad
+{
+	skin: Embed(source="assets/skins/transparent.png");
+	icon: Embed(source="assets/icons/net_bad.png");
+}
+
+mx|Button.cam_unfind
+{
+	skin: Embed(source="assets/skins/transparent.png");
+	upIcon: Embed(source="assets/icons/cam_unfind.png");
+	overIcon: Embed(source="assets/icons/cam_unfind.png");
+	downIcon: Embed(source="assets/icons/cam_unfind.png");
+	disabledIcon: Embed(source="assets/icons/cam_unfind.png");
+/*	selectedUpIcon: Embed(source="assets/icons/cam_on.png");
+	selectedOverIcon: Embed(source="assets/icons/cam_on.png");
+	selectedDownIcon: Embed(source="assets/icons/cam_on.png");
+	selectedDisabledIcon: Embed(source="assets/icons/cam_on.png");*/
+}
+
+mx|Button.cam_off
+{
+	skin: Embed(source="assets/skins/transparent.png");
+	upIcon: Embed(source="assets/icons/cam_off.png");
+	overIcon: Embed(source="assets/icons/cam_off.png");
+	downIcon: Embed(source="assets/icons/cam_off.png");
+	disabledIcon: Embed(source="assets/icons/cam_off.png");
+/*	selectedUpIcon: Embed(source="assets/icons/cam_on.png");
+	selectedOverIcon: Embed(source="assets/icons/cam_on.png");
+	selectedDownIcon: Embed(source="assets/icons/cam_on.png");
+	selectedDisabledIcon: Embed(source="assets/icons/cam_on.png");*/
+}
+
+mx|Button.cam_on
+{
+	skin: Embed(source="assets/skins/transparent.png");
+	upIcon: Embed(source="assets/icons/cam_on.png");
+	overIcon: Embed(source="assets/icons/cam_on.png");
+	downIcon: Embed(source="assets/icons/cam_on.png");
+	disabledIcon: Embed(source="assets/icons/cam_on.png");
+/*	selectedUpIcon: Embed(source="assets/icons/cam_on.png");
+	selectedOverIcon: Embed(source="assets/icons/cam_on.png");
+	selectedDownIcon: Embed(source="assets/icons/cam_on.png");
+	selectedDisabledIcon: Embed(source="assets/icons/cam_on.png");*/
+}
+
+mx|Button.mic_unfind
+{
+	skin: Embed(source="assets/skins/transparent.png");
+	upIcon: Embed(source="assets/icons/mic_unfind.png");
+	overIcon: Embed(source="assets/icons/mic_unfind.png");
+	downIcon: Embed(source="assets/icons/mic_unfind.png");
+	disabledIcon: Embed(source="assets/icons/mic_unfind.png");
+/*	selectedUpIcon: Embed(source="assets/icons/mic_on.png");
+	selectedOverIcon: Embed(source="assets/icons/mic_on.png");
+	selectedDownIcon: Embed(source="assets/icons/mic_on.png");
+	selectedDisabledIcon: Embed(source="assets/icons/mic_on.png");*/
+}
+
+mx|Button.mic_off
+{
+	skin: Embed(source="assets/skins/transparent.png");
+	upIcon: Embed(source="assets/icons/mic_off.png");
+	overIcon: Embed(source="assets/icons/mic_off.png");
+	downIcon: Embed(source="assets/icons/mic_off.png");
+	disabledIcon: Embed(source="assets/icons/mic_off.png");
+/*	selectedUpIcon: Embed(source="assets/icons/mic_on.png");
+	selectedOverIcon: Embed(source="assets/icons/mic_on.png");
+	selectedDownIcon: Embed(source="assets/icons/mic_on.png");
+	selectedDisabledIcon: Embed(source="assets/icons/mic_on.png");*/
+}
+
+mx|Button.mic_on
+{
+	skin: Embed(source="assets/skins/transparent.png");
+	upIcon: Embed(source="assets/icons/mic_on.png");
+	overIcon: Embed(source="assets/icons/mic_on.png");
+	downIcon: Embed(source="assets/icons/mic_on.png");
+	disabledIcon: Embed(source="assets/icons/mic_on.png");
+/*	selectedUpIcon: Embed(source="assets/icons/mic_on.png");
+	selectedOverIcon: Embed(source="assets/icons/mic_on.png");
+	selectedDownIcon: Embed(source="assets/icons/mic_on.png");
+	selectedDisabledIcon: Embed(source="assets/icons/mic_on.png");*/
+}
+
+mx|Button.mic_mute
+{
+	skin: Embed(source="assets/skins/transparent.png");
+	upIcon: Embed(source="assets/icons/mic_disable.png");
+	overIcon: Embed(source="assets/icons/mic_disable.png");
+	downIcon: Embed(source="assets/icons/mic_disable.png");
+	disabledIcon: Embed(source="assets/icons/mic_disable.png");
+/*	selectedUpIcon: Embed(source="assets/icons/mic_on.png");
+	selectedOverIcon: Embed(source="assets/icons/mic_on.png");
+	selectedDownIcon: Embed(source="assets/icons/mic_on.png");
+	selectedDisabledIcon: Embed(source="assets/icons/mic_on.png");*/
+}
+
+mx|Button.spk_on
+{
+	skin: Embed(source="assets/skins/transparent.png");
+	upIcon: Embed(source="assets/icons/speaker_on.png");
+	overIcon: Embed(source="assets/icons/speaker_on.png");
+	downIcon: Embed(source="assets/icons/speaker_on.png");
+	disabledIcon: Embed(source="assets/icons/speaker_on.png");
+/*	selectedUpIcon: Embed(source="assets/icons/speaker_on.png");
+	selectedOverIcon: Embed(source="assets/icons/speaker_on.png");
+	selectedDownIcon: Embed(source="assets/icons/speaker_on.png");
+	selectedDisabledIcon: Embed(source="assets/icons/speaker_on.png");*/
+}
+
+mx|Button.spk_mute
+{
+	skin: Embed(source="assets/skins/transparent.png");
+	upIcon: Embed(source="assets/icons/speaker_disable.png");
+	overIcon: Embed(source="assets/icons/speaker_disable.png");
+	downIcon: Embed(source="assets/icons/speaker_disable.png");
+	disabledIcon: Embed(source="assets/icons/speaker_disable.png");
+/*	selectedUpIcon: Embed(source="assets/icons/speaker_on.png");
+	selectedOverIcon: Embed(source="assets/icons/speaker_on.png");
+	selectedDownIcon: Embed(source="assets/icons/speaker_on.png");
+	selectedDisabledIcon: Embed(source="assets/icons/speaker_on.png");*/
+}
+
+mx|VSlider.spe_slider
+{
+	thumbSkin: Embed(source="assets/icons/spe_slider_thumb.png");
+	trackHeight: 4;
+	trackSkin: Embed(source="assets/icons/spe_slider_track.png");
+	trackHighlightSkin: Embed(source="assets/icons/spe_slider_trackHighlight.png");
+	showTrackHighlight: true;
+	trackMargin: 0;
+	dataTipOffset: 5;
+}
+
+mx|Box.TitleWindowChat
+{
+	cornerRadius: 0;
+	borderSkin: Embed(source="assets/skins/sliderbkg.png",scaleGridRight="10",scaleGridLeft="3",scaleGridTop="3",scaleGridBottom="20");
+	paddingBottom: 0;
+	paddingLeft: 0;
+	paddingRight: 0;
+	paddingTop: 0;
+}
+

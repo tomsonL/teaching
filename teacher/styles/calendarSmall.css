@@ -1,0 +1,84 @@
+/*日历*/
+	.calendar{
+		padding:12px;
+		width: 262px;
+		height: 440px;
+		position:relative;
+	}
+	.calendar th,.calendar td{
+		font-size: 14px;
+		width: 22px;
+		height: 22px;
+		text-align: center;
+		cursor: pointer;
+		padding:4px;
+		position: relative;
+	}
+
+	.calendar th div,.calendar td div{
+		border:2px solid #eee;
+		background-color: #eee;
+		border-radius: 4px;
+		width: 22px;
+		height: 22px;
+		text-align: center;
+		line-height: 22px;
+	}
+	.calendar th div{
+		font-size: 12px;
+		font-weight: normal;
+		border:2px solid #fff;
+		background-color: #fff;
+	}
+	.calendar td.selected div{
+		border:2px solid #01abe8;
+		background-color: #fff;
+		color:#01abe8;
+	}
+
+	.calendar td.noThisMonth div{
+		border:2px solid #fff;
+		background-color: #fff;
+		color:#ddd;
+	}
+	.calendar td.canLesson div{
+		border:2px solid #eee;
+		background-color: #fff;
+	}
+	.calendar tbody tr td.today div{
+		color:#fff;
+		border:2px solid #8cc34b;
+		background-color: #8cc34b;
+	}
+	.calendar td span{
+		display: none;
+		position: absolute;
+		width: 6px;
+		height: 6px;
+		background-color: #01abe8;
+		border-radius: 50%;
+		left: 50%;
+		margin-left:-3px;
+		top:10px;
+	}
+	.calendar .dateBox{
+		height: 60px;
+		width: 7rem;
+		margin:0px auto;
+		text-align: center;
+		line-height: 44px;
+		font-size: 18px;
+	}
+	.calendar .controller{
+		width: 190px;
+		top:10px;
+		left:170px;
+		height: 40px;
+		line-height: 40px;
+		color:#01abe8;
+		font-size: 30px;
+	}
+	.calendar .controller div{
+		cursor:pointer;
+	}
+/*日历结束*/

@@ -1,0 +1,963 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" href="css/base.css">
+	<link rel="stylesheet" href="css/index1.css">
+	<script type="text/javascript" src='js/jquery.js'></script>
+	<style type="text/css">
+		object:focus { outline:none; }
+		*{
+			margin: 0;
+			padding: 0;
+		}
+        body,iframe{
+            overflow: hidden;
+        }
+        #video_main,#video_slave {
+            position: absolute;
+            z-index: 120;
+            cursor: pointer;
+        }
+	</style>
+
+	<!-- 获取iframe参数 -->
+    <script language="javascript">
+        function GetRequest() {
+            var url = location.search; //获取url中"?"符后的字串
+            var theRequest = new Object();
+            if (url.indexOf("?") != -1) {
+                var str = url.substr(1);
+                strs = str.split("&");
+                for (var i = 0; i < strs.length; i++) {
+                    theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+                }
+            }
+            return theRequest;
+        }
+        var Request = new Object();
+        Request = GetRequest();
+        var room_Num, role_Type, user_Name, user_Pwd,user_Time,studentId,LessonId,courseName,nextTest = false,userInCount = 0;
+        room_Num = Request['room_Num'];
+        role_Type = Request['role_Type'];
+        user_Name = decodeURIComponent(Request['user_Name']);
+        user_Pwd = Request['user_Pwd'];
+        user_Time = Request['time_surplus'];
+        studentId = Request['studentId'];
+        LessonId = Request['LessonId'];
+        courseName = decodeURIComponent(Request['courseName']);
+
+         var isStuOK = false;
+        var m_webServerIP = "www.weiyicloud.com";
+        var m_webServerPort = "80";
+
+    //<!-- movieName:Flash模块的id -->
+        function thisMovie(movieName) {
+            var isIE = navigator.appName.indexOf("Microsoft") != -1;
+            return (isIE) ? window[movieName] : document[movieName];
+        }
+
+        function thisElement(id) {
+            return document.getElementById(id);
+        }
+
+        var fileList = new Array();//会议中的文件列表
+        var userList = new Array();//会议中的用户列表
+        var isWBModuleComplete = false;//白板模块是否准备完成
+        var isVideoModuleComplete = false;//视频模块是否准备完成
+        var m_localUserInfo;//本地用户(自己)信息
+        var m_peerID;//本地用户(自己)的ID，此ID由服务器分配，接口中所有使用的用户ID均为服务器分配的用户ID
+        var m_userName;//本地用户(自己)用户名
+        var m_userType;//本地用户(自己)用户类型。0：学生、1：教师
+        var m_hasAudio;//本地用户(自己)是否有音频设备
+        var m_hasVideo;//本地用户(自己)是否有视频设备
+        var m_mediaServerIP;//媒体服务器ip
+        var m_mediaServerTcpPort;//媒体服务器tcp端口
+        var m_mediaServerUdpPort;//媒体服务器udp端口
+
+        //白板模块和视频模块的回调函数名相同，故回调处理统一在此完成
+        var OnFlashInvoke = function () {
+            var cbkFuncName = arguments[0];
+            switch (cbkFuncName) {
+                //<!-- 以下为白板模块的回调 -->
+                //加载会议文件列表，需修改
+                case "OnGetMeetingFileReply":
+                    if (arguments[1].result == 0) {
+                        fileList = arguments[1].meetingfile;
+                        fileList.push(arguments[1].whiteboard);
+                        var sel = $('#sel');
+                        for (var index = 0; index < fileList.length; index++) {
+                            var optionItem = $('<li></li>');
+                            optionItem.attr('value', index);
+                            optionItem.append($('<img src="img/CAIItem.png" alt="">'));
+                            optionItem.append($('<span>' + fileList[index].filename.substring(0, 6) + '</span>'));
+                            optionItem.append($('<img class="imgRight" src="img/eyeB.png" alt="">'));
+                            //fileList中的每个文集都有filename、fileid字段
+                            sel.append(optionItem);
+                        }
+                        //console.log(sel);
+                    }
+                    break;
+
+                case "OnNetConnectionReply":
+                    onNetConnectionReply(arguments[1]);
+                    break;
+                    //获取自己的信息，服务器用户Id,类型，是否有音视频
+                case "OnEnablePresence":
+                    m_localUserInfo = arguments[1];
+                    m_peerID = m_localUserInfo.peerID;
+                    //thisElement('uid').value = m_peerID;
+                    m_userName = m_localUserInfo.userName;
+                    m_userType = m_localUserInfo.userType;
+                    m_hasAudio = m_localUserInfo.hasAudio;
+                    m_hasVideo = m_localUserInfo.hasVideo;
+                    
+                    break;
+
+                case "OnWBModulePrepareComplete":
+                    isWBModuleComplete = true;
+                    m_mediaServerIP = arguments[1];
+                    m_mediaServerTcpPort = arguments[2];
+                    m_mediaServerUdpPort = arguments[3];
+
+                    //白板模块准备完成，设置白板属性
+                    thisMovie("MicroLanguage_WB").Flash_SetWBPenColor(0xff0000);
+                    thisMovie("MicroLanguage_WB").Flash_SetWBPenThickness(5);
+                    thisMovie("MicroLanguage_WB").Flash_SetWBPenAlpha(1);
+                    thisMovie("MicroLanguage_WB").Flash_SetWBRectColor(0x00ff00);
+                    thisMovie("MicroLanguage_WB").Flash_SetWBRectThickness(5);
+                    thisMovie("MicroLanguage_WB").Flash_SetWBRectAlpha(1);
+                    thisMovie("MicroLanguage_WB").Flash_SetWBTextColor(0x0000ff);
+                    thisMovie("MicroLanguage_WB").Flash_SetWBTextFont("微软雅黑");
+                    thisMovie("MicroLanguage_WB").Flash_SetWBTextSize(33);
+
+                    if (isWBModuleComplete && isVideoModuleComplete) {
+                        initial();
+                    }
+                    break;
+                    //用户进入获取用户信息，包含自己
+                case "OnUserIn":
+                    userList.push(arguments[1]); //推送给会议中所有人
+                    console.log(arguments[1]);
+                    if (arguments[1].userType == 0 && arguments[1].userName != 'checker') {
+                        console.log('学生');
+                        $('.stuCover').remove();
+                        thisMovie("video_slave").Flash_UnplayAudio(parseInt(arguments[1].peerID));
+                        thisMovie("video_slave").Flash_PlayAudio(parseInt(arguments[1].peerID));
+                        thisMovie("video_slave").Flash_PlayVideo(parseInt(arguments[1].peerID), 0);
+                    }
+                    else if (arguments[1].userType == 1 && arguments[1].userName != 'checker') {
+                        console.log('教师');
+                        $('.tchCover').remove();
+                        thisMovie("video_tch").Flash_UnplayAudio(parseInt(arguments[1].peerID));
+                        thisMovie("video_tch").Flash_PlayAudio(parseInt(arguments[1].peerID));
+                        thisMovie("video_tch").Flash_PlayVideo(parseInt(arguments[1].peerID), 0);
+                    }
+                    break;
+                    //用户退出信息相关
+                case "OnUserOut":
+                    var outUserID = arguments[1];
+                    var div =  $('<div>').css({
+                                    'width':$("#video_slave").width(),
+                                    'height':$("#video_slave").height(),
+                                    'position':'absolute',
+                                    'z-index':200,
+                                    'background-color':'#000'
+                                }).append($('<p>断开连接<br />Disconnection</p>').css({
+                                    'color':'#fff',
+                                    'height':30,
+                                    'text-align':'center',
+                                    'font-size':'20px',
+                                    'margin-top':'36%'
+                                }));
+                    for (var i = 0; i < userList.length; i++) {
+                        if (userList[i].peerID == outUserID) {
+                            //outUserName = userList[i].userName;
+                            if(userList[i].userType == 0 && userList[i].userName != 'checker'){
+                               $('.videoBox').append(div.clone().addClass('stuCover').css({
+                                    'left':$('#video_slave').css('left'),
+                                    'top':$('#video_slave').css('top'),
+                                    'right':$('#video_slave').css('right')
+                               }));
+                            }
+                            else if(userList[i].userType == 1 && userList[i].userName != 'checker'){
+                               $('.videoBox').append(div.clone().addClass('tchCover').css({
+                                    'left':$('#video_tch').css('left'),
+                                    'top':$('#video_tch').css('top'),
+                                    'right':$('#video_tch').css('right')
+                               }));
+                            }
+                            userList.splice(i, 1);
+                            break;
+                        }
+                    }
+
+                    break;
+
+                case "OnShowPage":
+                    var showingFileID = arguments[1];
+                    var showingPageID = arguments[2];
+                    for (var i = 0; i < fileList.length; i++) {
+
+                        if (fileList[i].fileid == showingFileID) {
+                            thisElement('sel').options[i].selected = true;
+                            break;
+                        }
+                    }
+                    break;
+                    //文本信息接口，暂时没用
+                case "OnReceiveTextMsg":
+                    var fromID = arguments[1];
+                    var msgBody = arguments[2];
+                    var fromName;
+                    for (var i = 0; i < userList.length; i++) {
+                        if (userList[i].peerID == fromID) {
+                            fromName = userList[i].userName;
+                            break;
+                        }
+                    }
+                    // alert("message from: " + fromName + "\r\n" +
+                    // "message content: " + msgBody);
+                    if (msgBody.indexOf("@@@###") > -1) {
+                        console.log(msgBody);
+                        var div = $('<div>').css({
+                            'width': $("#video_slave").width(),
+                            'height': $("#video_slave").height(),
+                            'position': 'absolute',
+                            'z-index': 200,
+                            'background-color': '#000'
+                        }).append($('<p>学生因网络状况不好已关闭视频.</p>').css({
+                            'color': '#fff',
+                            'height': 60,
+                            'text-align': 'center',
+                            'font-size': '20px',
+                            'margin-top': '32%'
+                        }));
+                        if (isStuOK == false) {
+                            $('.videoBox').append(div.clone().addClass('stuCover').css({
+                                'top': $('#video_slave').css('top'),
+                                'left': $('#video_slave').css('left'),
+                                'right': $('#video_slave').css('right')
+                            }));
+                            isStuOK = true;
+                        }
+
+                    }
+                    break;
+
+                    //<!-- 以下为视频模块的回调 -->
+                case "OnVideoModulePrepareComplete":
+                    isVideoModuleComplete = true;
+                    if (isWBModuleComplete && isVideoModuleComplete) {
+                        initial();
+                    }
+                    break;
+                    //点击打开或关闭视频窗口
+                case "OnCamChanged":
+                    var camOpened = arguments[1];
+                    if (camOpened == true) {
+						publisVideo();
+                        // alert("Camera was opened");
+                    }
+                    else if (camOpened == false) {
+						unpublisVideo();
+                        // alert("Camera was closed");
+                    }
+                    break;
+                    //打开或关闭麦克风窗口
+                case "OnMicChanged":
+                    var micOpend = arguments[1];
+                    if (micOpend == true) {
+						publisAudio();
+                        // alert("Microphone was opened");
+                    }
+                    else if (micOpend == false) {
+                        unpublisAudio();
+                        // alert("Microphone was muted");
+                    }
+                    break;
+
+                case "OnUpNetState":
+                    var upSta = arguments[1];
+                    if (upSta == 0) {
+                        // console.log("Uplink network good");
+                    }
+                    else if (upSta == 1) {
+                        // console.log("Uplink network bad");
+                    }
+                    break;
+
+                case "OnDownNetState":
+                    var downSta = arguments[1];
+                    if (downSta == 0) {
+                        // console.log("Downlink network good");
+                    }
+                    else if (downSta == 1) {
+                        // console.log("Downlink network bad");
+                    }
+                    break;
+
+                case "OnDetecAudioDevReply":
+                    var aDev = arguments[1];
+                    if (aDev == 0) {
+                        console.log("Normal audio device");
+                    }
+                    else if (aDev == -1) {
+                        console.log("No audio device");
+                    }
+                    else if (aDev == -2) {
+                        console.log("Audio device disabled");
+                    }
+                    break;
+
+                case "OnDetectVideoDevReply":
+                    var vDev = arguments[1];
+                    if (vDev == 0) {
+                        console.log("Normal video device");
+                    }
+                    else if (vDev == -1) {
+                        console.log("No video device");
+                    }
+                    else if (vDev == -2) {
+                        console.log("Video device disabled");
+                    }
+                    break;
+
+                case "OnDetectNetStateReply":
+                    var netSta = arguments[1];
+                    if (netSta == 0) {
+                        console.log("Network good");
+                    }
+                    else if (netSta == 1) {
+                        console.log("Network bad");
+                    }
+                    break;
+                case "OnGetMicListReply":
+                    m_micList = arguments[1];
+                    m_curMicIndex = arguments[2];
+                    m_curMicName = arguments[3];
+                    $("#micsel").empty();
+                    var micsel = thisElement('micsel');
+                    for(var index=0; index < m_micList.length; index++)
+                    {
+                        var optionItem = document.createElement("OPTION");
+                        optionItem.value=index;
+                        optionItem.text= m_micList[index];
+                        micsel.options.add(optionItem);
+                    }
+
+                    if(m_curMicIndex < m_micList.length)
+                    {
+                        micsel.options[m_curMicIndex].selected = true;
+                    }
+                    break;
+
+                case "OnGetCamListReply":
+                    m_camList = arguments[1];
+                    m_curCamIndex = arguments[2];
+                    m_curCamName = arguments[3];
+                    m_curCamWidth = arguments[4];
+                    m_curCamHeight = arguments[5];
+                    $('#camsel').empty();
+                    var camsel = thisElement('camsel');
+                    for(var index = 0; index < m_camList.length; index++)
+                    {
+                        var optionItem = document.createElement("OPTION");
+                        optionItem.value=index;
+                        optionItem.text= m_camList[index];
+                        camsel.options.add(optionItem);
+                    }
+
+                    if(m_curCamIndex < m_camList.length)
+                    {
+                        camsel.options[m_curCamIndex].selected = true;
+                    }
+                    break;
+                case "OnUpVideoBWReply":
+                    //发布自己的视频后(即调用Flash_PublishVideo)会收到此回调，每3秒收一次。单位:kbps
+                   // console.log("up bandwidth: "+arguments[1]+"kbps");
+                    break;
+
+                case "OnDownVideoBWReply":
+                    //播放别人的视频后(即调用Flash_PlayVideo接口)会收到此回调，每3秒收一次。单位:kbps
+                    //console.log("user id: "+arguments[1]+"  video id："+arguments[2]+"  down bandwidth: "+arguments[3]+"kbps");
+                    break;
+                case "OnDevStatusChange":
+                        var mutedStatus = arguments[1];
+                        if(mutedStatus == -1)
+                        {
+                            nextTest = false;
+                            // console.log("audio&video device were muted");//点击了拒绝
+                        }
+                        else if(mutedStatus == 0)
+                        {
+                            nextTest = true;
+                            if(m_hasAudio){
+                                $('#nowBegin').removeClass('dis');
+                            }
+                            //console.log("audio&video device were unmuted");//点击了允许
+                        }
+                        break;
+                default:
+                    break;
+            }
+        }
+
+        //会议文件变更加载
+        function onFileChange(value) {
+            var fileID = fileList[value].fileid;//文档ID
+            var pageNum = fileList[value].pagenum;//文档总页数。注：白板无此字段
+            thisMovie("MicroLanguage_WB").Flash_ShowFile(fileID, 1);
+        }
+
+        function playVideo() {
+            //<!-- 调用从视频模块中的播放视频方法，在从视频模块中播放指定用户的视频 -->
+            thisMovie("video_slave").Flash_PlayVideo(parseInt(thisElement("uid").value), 0);
+        }
+
+        function unplayVideo() {
+            //<!-- 调用从视频模块中的停止播放视频方法，停止从视频模块中正在播放的视频 -->
+            thisMovie("video_slave").Flash_UnplayVideo(parseInt(thisElement("uid").value), 0);
+        }
+
+        function playAudio() {
+            //<!-- 调用主视频模块中的播放音频方法，通过主视频模块播放指定用户的音频 -->
+            thisMovie("video_main").Flash_PlayAudio(parseInt(thisElement("uid").value));
+        }
+
+        function unplayAudio() {
+            //<!-- 调用主视频模块中的停止播放音频方法，停止在主视频模块中正在播放的音频 -->
+            thisMovie("video_main").Flash_UnplayAudio(parseInt(thisElement("uid").value));
+        }
+
+        function publisAudio() {
+            //<!-- 调用主视频模块中的发布音频方法，通过主视频模块发布自己的音频 -->
+            thisMovie("video_main").Flash_PublishAudio();
+        }
+
+        function unpublisAudio() {
+            //<!-- 调用主视频模块中的停止发布音频方法，通过主视频模块停止发布自己的音频 -->
+            thisMovie("video_main").Flash_UnpublishAudio();
+        }
+
+        function publisVideo() {
+            //<!-- 调用主视频模块中的发布视频方法，通过主视频模块发布自己的视频 -->
+            thisMovie("video_main").Flash_PublishVideo(0);
+        }
+
+        function unpublisVideo() {
+            //<!-- 调用主视频模块中的停止发布视频方法，通过主视频模块停止发布自己的视频 -->
+            thisMovie("video_main").Flash_UnpublishVideo(0);
+        }
+
+        function sendTextMsg() {
+            //<!-- 调用白板模块中的发送文本消息方法，向会议中其他用户发送文本消息 -->
+            thisMovie("MicroLanguage_WB").Flash_SendTextMsg("hello world", 0);
+        }
+
+        function setFocusUser() {
+            //<!-- 调用白板模块中的设置焦点用户的方法，设置录制焦点 -->
+            thisMovie("MicroLanguage_WB").Flash_SetFocusUser(parseInt(thisElement("uid").value));
+        }
+
+        function removeFocusUser() {
+            //<!-- 调用白板模块中的移除焦点用户的方法，移除录制焦点 -->
+            thisMovie("MicroLanguage_WB").Flash_RemoveFocusUser(parseInt(thisElement("uid").value));
+        }
+
+        function startRecord() {
+            //<!-- 调用白板模块中的开始录制方法，录制会议音视频 -->
+            thisMovie("MicroLanguage_WB").Flash_StartRecord();
+        }
+
+        function stopRecord() {
+            //<!-- 调用白板模块中的停止录制方法，停止录制会议音视频 -->
+            thisMovie("MicroLanguage_WB").Flash_StopRecord();
+        }
+
+        function detAudioDev() {
+            //<!-- 调用主视频模块中的检测音频设备方法，检测音频设备状态 -->
+            thisMovie("video_main").Flash_DetectAudioDevice();
+        }
+
+        function detVideoDev() {
+            //<!-- 调用主视频模块中的检测视频设备方法，检测视频设备状态 -->
+            thisMovie("video_main").Flash_DetectVideoDevice();
+        }
+
+        function detNetState() {
+            //<!-- 调用主视频模块中的检测网络状态方法，检测网络状态 -->
+            thisMovie("video_main").Flash_DetectNetState();
+        }
+
+        function onNetConnectionReply(status) {
+            switch (status) {
+                case "Success":
+                    //<!-- 成功连接到服务器 -->
+                    //alert("Connect server success");
+                    break;
+                case "Failed":
+                    //<!-- 无法连接到服务器 -->
+                    // alert("Connect server failed");
+                    break;
+                case "Rejected":
+                    //<!-- 连接服务器被拒绝，一般是点数超限造成 -->
+                    // alert("Connect server rejected");
+                    break;
+                case "Closed":
+                    //<!-- 与服务器的连接中断 -->
+                    // alert("Server connection closed");
+                    break;
+                default:
+                    break;
+            }
+        }
+        //<!-- 获取音视频设备列表 -->
+        //<!-- 注：Flash没有获取扬声器的能力 -->
+        function getAVDevList()
+        {
+            //获取麦克风列表，通过OnGetMicListReply回调返回麦克风信息
+            thisMovie("video_main").Flash_GetMicList();
+            //获取摄像头列表，通过OnGetCamListReply回调返回摄像头信息
+            thisMovie("video_main").Flash_GetCamList();
+        }
+
+        function onMicChange(value)
+        {
+            //Flash_SetMicrophone(index)
+            //index:麦克风索引
+            thisMovie("video_main").Flash_SetMicrophone(value);
+            m_curCamIndex = value;
+        }
+
+        function onCamChange(value)
+        {
+            //Flash_SetCamera(index,wid,hei)
+            //index:摄像头索引
+            //wid:分辨率宽
+            //hei:分辨率高
+            thisMovie("video_main").Flash_SetCamera(value,m_curCamWidth,m_curCamHeight);
+            m_curCamIndex = value;
+        }
+
+        function initial() { 
+            //<!-- Flash_SetSelfProperty是视频模块的接口，而m_localUserInfo由白板模块得到，故要等到白板模块和视频模块都准备完成才可调用此接口 -->
+            //<!-- 一定要在调用任何Flash接口前调用Flash_SetSelfProperty接口，为主、从视频模块设置属性 -->
+            
+            thisMovie("video_main").Flash_SetConnectionInfo(m_mediaServerIP,m_mediaServerTcpPort,m_mediaServerUdpPort);
+            thisMovie("video_main").Flash_SetSelfProperty(m_localUserInfo);
+            thisMovie("video_main").Flash_PlayVideo(m_peerID,0);
+            thisMovie("video_slave").Flash_SetConnectionInfo(m_mediaServerIP,m_mediaServerTcpPort,m_mediaServerUdpPort);
+            thisMovie("video_slave").Flash_SetSelfProperty(m_localUserInfo);
+            thisMovie("video_tch").Flash_SetConnectionInfo(m_mediaServerIP,m_mediaServerTcpPort,m_mediaServerUdpPort);
+            thisMovie("video_tch").Flash_SetSelfProperty(m_localUserInfo);
+
+            getAVDevList();
+            publisVideo();
+            publisAudio();
+
+        }
+    </script>
+    <link rel="stylesheet" type="text/css" href="history/history.css" />
+    <script type="text/javascript" src="history/history.js"></script>
+    <script type="text/javascript" src="swfobject.js"></script>
+    <!-- Enable Browser History by replacing useBrowserHistory tokens with two hyphens -->
+    <!-- BEGIN Browser History required section -->
+    <!-- END Browser History required section -->  
+    
+    <!--<script type="text/javascript" src="swfobject.js"></script>-->
+    
+	<!-- 加载白板模块 -->
+	    <script type="text/javascript">
+	        var swfVersionStr = "11.1.0";
+	        var xiSwfUrlStr = "playerProductInstall.swf";
+			// <!----------------------------------------------------------------------------------------------------------------------------->
+			// <!-- ip:web服务器ip -->
+			// <!-- port:web服务器端口 -->
+			// <!-- mid:会议号 -->
+			// <!-- uname:用户名 -->
+			// <!-- pwd:会议密码 -->
+			// <!-- utype:用户类型。0：学生、1：教师 -->
+			// <!----------------------------------------------------------------------------------------------------------------------------->
+	        var flashvars = { ip: "www.weiyicloud.com", port: "80", mid: room_Num, uname: user_Name, pwd: user_Pwd, utype: role_Type};
+	        var params = {};
+	        params.quality = "high";
+	        params.bgcolor = "#869ca7";
+	        params.allowscriptaccess = "sameDomain";
+	        params.allowfullscreen = "true";
+	        params.wmode="transparent";
+	        var attributes = {};
+	        attributes.id = "MicroLanguage_WB";
+	        attributes.name = "MicroLanguage_WB";
+	        attributes.align = "left";
+	        swfobject.embedSWF(
+	            "MicroLanguage_WB.swf", "whiteboard","600", "450", 
+	            swfVersionStr, xiSwfUrlStr,flashvars, params, attributes);
+	        swfobject.createCSS("#whiteboard", "display:block;text-align:left;");
+	    </script>
+	
+	<!-- 加载主视频模块，发布、播放自己的音视频，及播放其他人的音频，均调用此模块中的接口完成 -->
+		<script type="text/javascript">
+	        var swfVersionStr = "11.1.0";
+	        var xiSwfUrlStr = "playerProductInstall.swf";
+			// <!----------------------------------------------------------------------------------------------------------------------------->
+			// <!-- mid:会议号 -->
+			// <!-- toolbarinvisible：不显示工具条。0：显示、1：不显示。主视频模块可选择显示，从视频模块可选择不显示 -->
+			// <!-- uncollectav:不采集音视频。即是否弹出Adobe Flash Player的允许决绝对话框。若不弹出此对话框，则无法使用音视频设备采集音视频，但可以播放音视频 -->
+			// <!-- 从视频模块可选择不弹出此对话框，因为从视频模块一般只用来播放视频。0：采集(弹出对话框)、1:不采集(不弹出对话框) -->
+			// <!----------------------------------------------------------------------------------------------------------------------------->
+	        var flashvars = {mid: room_Num,toolbarinvisible:0,uncollectav:0};
+	        var params = {};
+	        params.quality = "high";
+	        params.bgcolor = "#869ca7";
+	        params.allowscriptaccess = "sameDomain";
+	        params.allowfullscreen = "true";
+			params.wmode="transparent";
+	        var attributes = {};
+	        attributes.id = "video_main";
+	        attributes.name = "video_main";
+	        attributes.align = "middle";
+	        swfobject.embedSWF(
+	            "MicroLanguage_Video.swf", "video_main","100%", "100%",
+	            swfVersionStr, xiSwfUrlStr,flashvars, params, attributes);
+	        swfobject.createCSS("#video_main", "display:block;text-align:left;");
+	    </script>
+		
+	<!-- 加载从视频模块，只用来显示其他人视频，故只调用此模块中的开始播放视频和停止播放视频接口 -->
+        <script type="text/javascript">
+            var swfVersionStr = "11.1.0";
+            var xiSwfUrlStr = "playerProductInstall.swf";
+            // <!----------------------------------------------------------------------------------------------------------------------------->
+            // <!-- mid:会议号 -->
+            // <!-- toolbarinvisible：不显示工具条。0：显示、1：不显示。主视频模块可选择显示，从视频模块可选择不显示 -->
+            // <!-- uncollectav:不采集音视频。即是否弹出Adobe Flash Player的允许决绝对话框。若不弹出此对话框，则无法使用音视频设备采集音视频，但可以播放音视频 -->
+            // <!-- 从视频模块可选择不弹出此对话框，因为从视频模块一般只用来播放视频。0：采集(弹出对话框)、1:不采集(不弹出对话框) -->
+            // <!----------------------------------------------------------------------------------------------------------------------------->
+            var flashvars = {mid:room_Num,toolbarinvisible:1,uncollectav:1};
+            var params = {};
+            params.quality = "high";
+            params.bgcolor = "#869ca7";
+            params.allowscriptaccess = "sameDomain";
+            params.allowfullscreen = "true";
+			params.wmode="transparent";
+            var attributes = {};
+            attributes.id = "video_slave";
+            attributes.name = "video_slave";
+            attributes.align = "middle";
+            swfobject.embedSWF(
+                "MicroLanguage_Video.swf", "video_slave","320", "240", 
+                swfVersionStr, xiSwfUrlStr,flashvars, params, attributes);
+            swfobject.createCSS("#video_slave", "display:block;text-align:left;");
+        </script>
+
+        <!-- 加载从视频模块，只用来显示其他人视频，故只调用此模块中的开始播放视频和停止播放视频接口 -->
+        <script type="text/javascript">
+            var swfVersionStr = "11.1.0";
+            var xiSwfUrlStr = "playerProductInstall.swf";
+            // <!----------------------------------------------------------------------------------------------------------------------------->
+            // <!-- mid:会议号 -->
+            // <!-- toolbarinvisible：不显示工具条。0：显示、1：不显示。主视频模块可选择显示，从视频模块可选择不显示 -->
+            // <!-- uncollectav:不采集音视频。即是否弹出Adobe Flash Player的允许决绝对话框。若不弹出此对话框，则无法使用音视频设备采集音视频，但可以播放音视频 -->
+            // <!-- 从视频模块可选择不弹出此对话框，因为从视频模块一般只用来播放视频。0：采集(弹出对话框)、1:不采集(不弹出对话框) -->
+            // <!----------------------------------------------------------------------------------------------------------------------------->
+            var flashvars = {mid:room_Num,toolbarinvisible:1,uncollectav:1};
+            var params = {};
+            params.quality = "high";
+            params.bgcolor = "#869ca7";
+            params.allowscriptaccess = "sameDomain";
+            params.allowfullscreen = "true";
+			params.wmode="transparent";
+            var attributes = {};
+            attributes.id = "video_tch";
+            attributes.name = "video_tch";
+            attributes.align = "middle";
+            swfobject.embedSWF(
+                "MicroLanguage_Video.swf", "video_tch","320", "240", 
+                swfVersionStr, xiSwfUrlStr,flashvars, params, attributes);
+            swfobject.createCSS("#video_tch", "display:block;text-align:left;");
+        </script>
+</head>
+<body>
+    <div class='classMain'>
+        <!-- 顶部 -->
+        <div class="classTop">
+            <div class="leftTitle">
+                <span class="classTitle" id='spanFileName'>剑桥少儿英语--第1课 Talking about Time and Date</span>
+                <span class="classTime"><span id='minute'>00</span>分<span id='second'>00</span>秒</span>
+            </div>
+            <div class="rightTitle" style=''>
+                <span class="debug" style='right:110px;'>
+                    设备信息
+                    <div class='debugDiv'>
+                        <ul id="debug"></ul>
+                    </div>
+                </span>
+            </div>
+		</div>        
+        <!-- 白板区 -->
+        <div class="course">
+            <div class="courseContent">
+                <div class="whiteCover"></div>
+                <div id="whiteboard"></div>
+            </div>
+            <div class="courseBtn">
+                <div class="recording" style='display:none;'>
+                    录音
+                    <span id='recordTime'>00:00:00</span>
+                </div>
+                <div class="CAI">
+                     课件
+                    <div class='CAIDiv'>
+                        <ul id="sel">
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 课件区结束 -->        
+        <!-- 右边窗口 -->
+        <div class="rightWindow">            
+            <!-- 视频窗口 -->
+            <div class='teachDiv' id="video">
+                <div class='teacherDiv'>
+                    <div class="teacherAudio">
+                        <span id='closeTeacher' style='position:absolute;width:20px;height:20px;text-align:center;color:#fff;font-size:22px;line-height:20px;border:1px solid #fff;border-radius:50%;left:10px;top:10px;z-index:999;cursor:pointer;display:none;'>&times;</span>
+                    </div>
+                </div>
+                <div class="studentDiv">
+                    <div class="studentAudio">
+                        <span id='closeStudent' style='position:absolute;width:20px;height:20px;text-align:center;color:#fff;font-size:22px;line-height:20px;border:1px solid #fff;border-radius:50%;left:10px;top:10px;z-index:999;cursor:pointer;display:none;'>&times;</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 聊天框 -->
+        <div class="mesWindow">
+            <iframe id='ifrText' style='width:100%;height:100%;' src="" frameborder="0"></iframe>      
+        </div>        
+        <!-- 视频盒子 -->
+        <div class="videoBox">
+            <div id="video_main"></div>
+            <div id="video_tch"></div>
+            <div id="video_slave"></div>      
+        </div>
+        <!-- 弹出设备选择 -->
+        <div class='alertOneTest' style=''>
+            <h3 style='margin:20px auto;text-align:center;font-size:20px;'>欢迎您进行设备设置</h3>
+            <div class="fl">
+                <p>1、请点击<i>允许</i>访问您的设备</p>
+                <p>2、通过<img style='display:inline-block;margin:0 4px;' src="img/audio.png" alt="">摄像头按钮设置打开或关闭摄像头</p>
+                <p style='padding-right:36px;'>3、如果视频或音频不正常，请在下列设备列表中选择：</p>
+                <p class='selD' style='margin-top:26px;'>摄像头<select class='selectDevice' name="" id="camsel" onchange="onCamChange(this.value);"></select></p>
+                <p class='selD'>麦克风<select class='selectDevice' name="" id="micsel" onchange="onMicChange(this.value);"></select></p>
+                <a href="javascript:;" class='' id='nowBegin'>立即上课</a>
+            </div>
+        </div>
+        <!-- 倒计时 -->
+        <div class='deviceCover'></div>
+        <div id="alertTime" style='display:none;position:fixed;left:50%;margin-left:-150px;top:300px;width:300px;height:160px;text-align:center;line-height:160px;font-size:20px;color:#08bbf2;background-color:#fff;box-shadow:0 0 20px #000;'>
+            <span id='surplus_Time'></span>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var winWidth = 0,
+        winHeight = 0,
+        VideoProportion = 1.33,//视频宽高比例
+        alertVideoWidth = 240,//弹窗中的视频宽
+        canMoveVideo = false,
+        videoWidth,//上课时视频宽
+        videoHeight,//上课时视频高
+        iframeTextWidth = videoBoxRight = 200;
+         //函数：获取尺寸
+        function findDimensions(){
+            //获取窗口宽度
+            if (window.innerWidth)
+                winWidth = window.innerWidth;
+            else if ((document.body) && (document.body.clientWidth))
+                winWidth = document.body.clientWidth;
+            //获取窗口高度
+            if (window.innerHeight)
+                winHeight = window.innerHeight;
+            else if ((document.body) && (document.body.clientHeight))
+                winHeight = document.body.clientHeight;
+            //通过深入Document内部对body进行检测，获取窗口大小
+            if (document.documentElement  && document.documentElement.clientHeight && document.documentElement.clientWidth)
+            {
+                winHeight = document.documentElement.clientHeight;
+                winWidth = document.documentElement.clientWidth;
+            }
+            videoWidth = (winHeight-50)/2*VideoProportion;//上课时视频宽
+            videoHeight = (winHeight-50)/2;//上课时视频高
+        }
+        findDimensions();   
+        //初始化聊天
+        $('#ifrText').attr('src', 'http://182.92.236.234:881/Hubs/Chat/?a=1&name='+ user_Name+'&type=checker&roomNO='+room_Num);
+
+        //初始化视频盒子的宽高
+        $('.videoBox').css({
+            'height':winHeight-50,
+            'width':videoWidth,
+            'position':'absolute',
+            'right':videoBoxRight
+        });
+
+        //将获取到的课程名放到DOM中
+        $("#spanFileName").text(decodeURIComponent(courseName));
+        window.onload=function(){
+            $("#MicroLanguage_WB").css({
+                'width':'0',
+                'height':'0'
+            })
+            $('.deviceCover').show();            
+			$("#nowBegin").on('click',function(){
+                // 允许视频回到右侧
+                canMoveVideo = true;
+
+                $(".alertOneTest").hide();
+                $("#MicroLanguage_WB").css({
+                    'width':'100%',
+                    'height':'100%'
+                })
+                $('.deviceCover').hide();
+                initTeachLeft();
+
+                $("#debug").empty();
+                $("#video_main").css({
+                    'width':0,
+                    'height':0
+                })
+
+                if(m_hasVideo){
+                    $("<li><img src='img/selected.png' alt=''>麦克风正常<p class='debugMsg'></p></li>").appendTo($("#debug"))
+                }
+                else{
+                    $("<li><img src='img/noSelect.png' alt=''>未检测到麦克风<p class='debugMsg'>请检查麦克风是否插入，驱动程序是否正确安装，或是否有其他程序正在占用麦克风.<i style='font-style:normal;color:red;'>请尝试刷新页面，重新选择设备</i></p></li>").appendTo($("#debug"))
+                }
+                
+                if(m_hasAudio){
+                    $("<li><img src='img/selected.png' alt=''>摄像头正常<p class='debugMsg'></p></li>").appendTo($("#debug"));
+                }
+                else{
+                    $("<li><img src='img/noSelect.png' alt=''>未检测到摄像头<p class='debugMsg'>请检查摄像头是否插入，驱动程序是否正确安装，或是否有其他程序正在占用摄像头.<i style='font-style:normal;color:red;'>请尝试刷新页面，重新选择设备</i></p></li>").appendTo($("#debug"))
+                }
+            })  
+            function initTeachLeft(){                
+                $(".mesWindow").css({
+                    'position':'absolute',
+                    'right':0,
+                    'top':50,
+                    'margin':0,
+                    'padding':0,
+                    'width':iframeTextWidth,
+                    'height':winHeight-50,
+                    'overflow':'hidden'
+                });
+
+                //初始白板盒子宽度
+                $('.course,#MicroLanguage_WB,.courseContent').css({
+                    'width':winWidth - iframeTextWidth - videoWidth,
+                    'height':winHeight-50
+                })
+                
+                //设置盒子回到盒子
+                $('.videoBox').css({
+                    'height':winHeight-50,
+                    'width':videoWidth,
+                    'position':'absolute',
+                    'right':iframeTextWidth
+                });
+                $('#video_slave').css({
+                    'position':'absolute',
+                    'width':videoWidth,
+                    'height':videoHeight,
+                    'right':0,
+                    'z-index':40,
+                    'margin':0
+                });
+                $('#video_tch').css({
+                    'position':'absolute',
+                    'width':videoWidth,
+                    'height':videoHeight,
+                    'right':0,
+                    'top':videoHeight,
+                    'margin':0
+                });
+            }
+            
+            initTeachLeft();
+
+            $('#video_main').css({
+                'position':'fixed',
+                'width':alertVideoWidth,
+                'height':alertVideoWidth/VideoProportion+40,
+                'left':'50%',
+                'top':'50%',
+                'margin-left':-alertVideoWidth/2-176,
+                'margin-top':-alertVideoWidth/VideoProportion/2,
+                'z-index':600
+            });
+
+            //浏览器大小改变事件
+            window.onresize = function(){                
+                findDimensions();
+                if(canMoveVideo){
+                    initTeachLeft();
+                }
+                
+            }     
+            
+            //课程时间 --倒计时
+            var minute = Math.floor(user_Time/60);
+            var second = user_Time%60;
+            var timer = setInterval(function () {
+                if (second) {
+                    second--;
+                }
+                else {
+                    minute--;
+                    second = 59;
+                }
+                $('#second').html((second < 10 ? '0' + second : second));
+                $('#minute').html((minute < 10 ? '0' + minute : minute));
+                if (minute == 5 && second == 0) {
+                    $('#alertTime').show().delay(1400).fadeOut();
+                    $('#surplus_Time').html('The class has 5 minutes left');
+                }
+                if (minute == 3 && second == 0) {
+                    
+                    $('#alertTime').show().delay(1400).fadeOut();
+                    $('#surplus_Time').html('The class has 3 minutes left');
+                }
+                if(minute==0 &&second==3){
+                $('#alertTime').show().delay(3000).fadeOut();
+                    $('#surplus_Time').html('The class is over');
+                }
+                if (minute == 0 && second == 0) {
+                    clearInterval(timer);
+                     window.parent.location.href=window.parent.location.href;
+                }
+            }, 1000);
+
+            //课件切换点击事件   
+            $("#sel").on('click', 'li', function () {
+                $("#sel li .imgRight").attr('src', 'img/eyeB.png');
+                $(this).find('.imgRight').attr('src', 'img/eyeA.png');
+                onFileChange($(this).index());
+            });
+            
+            //设备信息弹出
+            $('.debug').hover(function () {
+                $('.debugDiv').toggle();
+            })
+
+            //课件显示事件
+            $(".CAI").hover(function () {
+                $(".CAIDiv").toggle();
+            });
+        }
+    </script>
+
+</body>
+</html>

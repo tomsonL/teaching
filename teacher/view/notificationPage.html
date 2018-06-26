@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>MyPersonalPageFirst</title>
+	<link rel="stylesheet" href="../styles/reset.css">
+	<link rel="stylesheet" href="../styles/global.css">
+</head>
+<body>
+	<div id="main">
+		<div id="article">
+			<style type="text/css">
+				.notifications_con{
+					width:679px;
+					padding:0 85px 0 36px;
+				}
+				/*资料页公共样式*/
+				.common .title{
+					height:35px;
+					line-height:35px;
+					border-bottom:1px solid #ccc;
+					font-size:14px;
+				}
+				.common .title img{
+					width:20px;
+					vertical-align: middle;
+					margin-right:10px;
+				}
+				/*消息表格样式*/
+				.notice .class_table{
+					margin:20px 0;
+					width:660px;
+					font-size:12px;
+				}
+				.notice .class_table .table_head th{
+					height:20px;
+					line-height:20px;
+					text-align:center;
+					background:#0fa6ee;
+					color:#fff;
+					width:160px;
+				}
+				.notice .class_table .table_head .left_head{
+					border-radius: 10px 0 0 10px;
+					background:#0fa6ee;
+					width:360px;
+				}
+				.notice .class_table .table_head .right_head{
+					border-radius: 0 10px 10px 0;
+					background:#0fa6ee;
+					width:80px;
+				}
+				.notice .class_table .table_body .looked{
+					color:#8c8c8c;
+				}
+				.notice .class_table .table_body tr{
+					height:30px;
+					line-height:30px;
+					text-align:center;
+					border-bottom:1px solid #bbb;
+					font-size:12px;
+					color:#000;
+				}
+				/*删除按钮样式*/
+				.notice .bottom{
+					height:40px;
+					border:1px solid blue;
+					position:relative;
+				}
+				.notice .bottom .delete{
+					position:absolute;
+					right:20px;
+					top:10px;
+					width:60px;
+					height:20px;
+					color:#fff;
+					background:#0fa6ee;
+					border-radius: 10px;
+					border:none;
+					cursor:pointer;
+					font-size:12px;
+				}
+			</style>
+
+			<div class="notifications_con">
+				<!--消息页开始-->
+				<div class="notice common">
+					<p class="title"><img src="images/icons/notificationIcon.png"/>Notifications</p>
+					<!--消息数据表格开始-->
+					<table class="class_table">
+						<thead class="table_head">
+							<tr>
+								<th class="left_head">Notification</th>
+								<th>Time</th>
+								<th class="right_head">
+									<input type="checkbox" id="all_notification" />
+									<label for="all_notification">All</label>
+								</th>
+							</tr>
+						</thead>
+						<tbody class="table_body">
+							<tr>
+								<td>0The student cancalled your class on [03-04 18:30]</td>
+								<td>2016-03-03 13:30:29</td>
+								<td><input type="checkbox" /></td>
+							</tr>
+							<tr>
+								<td>1The student cancalled your class on [03-04 18:30]</td>
+								<td>2016-03-03 13:30:29</td>
+								<td><input type="checkbox" /></td>
+							</tr>
+							<tr>
+								<td>2The student cancalled your class on [03-04 18:30]</td>
+								<td>2016-03-03 13:30:29</td>
+								<td><input type="checkbox" /></td>
+							</tr>
+							<tr>
+								<td>3The student cancalled your class on [03-04 18:30]</td>
+								<td>2016-03-03 13:30:29</td>
+								<td><input type="checkbox" /></td>
+							</tr>
+							<tr>
+								<td>4The student cancalled your class on [03-04 18:30]</td>
+								<td>2016-03-03 13:30:29</td>
+								<td><input type="checkbox" /></td>
+							</tr>
+							<tr>
+								<td>5The student cancalled your class on [03-04 18:30]</td>
+								<td>2016-03-03 13:30:29</td>
+								<td><input type="checkbox" /></td>
+							</tr>
+							<tr>
+								<td>6The student cancalled your class on [03-04 18:30]</td>
+								<td>2016-03-03 13:30:29</td>
+								<td><input type="checkbox" /></td>
+							</tr>
+							<tr>
+								<td>7The student cancalled your class on [03-04 18:30]</td>
+								<td>2016-03-03 13:30:29</td>
+								<td><input type="checkbox" /></td>
+							</tr>
+							<tr>
+								<td>8The student cancalled your class on [03-04 18:30]</td>
+								<td>2016-03-03 13:30:29</td>
+								<td><input type="checkbox" /></td>
+							</tr>
+							<tr>
+								<td>9The student cancalled your class on [03-04 18:30]</td>
+								<td>2016-03-03 13:30:29</td>
+								<td><input type="checkbox" /></td>
+							</tr>
+							<tr>
+								<td>10The student cancalled your class on [03-04 18:30]</td>
+								<td>2016-03-03 13:30:29</td>
+								<td><input type="checkbox" /></td>
+							</tr>
+							<tr>
+								<td>11The student cancalled your class on [03-04 18:30]</td>
+								<td>2016-03-03 13:30:29</td>
+								<td><input type="checkbox" /></td>
+							</tr>
+							<tr class="looked">
+								<td>12The student cancalled your class on [03-04 18:30]</td>
+								<td>2016-03-03 13:30:29</td>
+								<td><input type="checkbox" /></td>
+							</tr>
+						</tbody>
+					</table>
+					<!--消息数据表格结束-->
+					<div class="bottom">
+						<div class="page">分页区域</div>
+						<input type="button" class="delete" id="delete_button" value="delete" />
+					</div>
+				</div>
+				<!--消息页结束-->
+			</div>
+
+			<script type="text/javascript">
+			;(function(){
+				function selectBox(){
+					var oAll = document.getElementById('all_notification');
+					var aCheck = document.querySelector('.table_body').querySelectorAll('input');
+					oAll.onclick = function(){
+						if(this.checked == true){
+							for(var i = 0;i<aCheck.length;i++){
+								aCheck[i].checked = true;
+							}
+						}else{
+							for(var i = 0;i<aCheck.length;i++){
+								aCheck[i].checked = false;
+							}
+						}	
+					};
+					for(var i = 0;i<aCheck.length;i++){
+						(function(index){
+							aCheck[index].onclick = function(){
+								var count = 0;
+								for(var i = 0;i<aCheck.length;i++){
+									if(aCheck[i].checked){
+										count++;
+									}else{
+										break;
+									}
+								}
+								if(count == aCheck.length){
+									oAll.checked = true;
+								}else{
+									oAll.checked = false;
+								}
+							};
+						})(i);
+					}
+				}
+				function deleteTr(){
+					var oDelBtn = document.getElementById('delete_button');
+					var oTable = document.querySelector('.table_body');
+					var aTableData = oTable.getElementsByTagName('tr');
+					oDelBtn.onclick = function(){
+						for(var i = aTableData.length-1;i>=0;i--){
+							(function(index){
+								if(aTableData[index].querySelector('input').checked){
+									oTable.removeChild(aTableData[index]);
+								}
+							})(i);
+						}
+					};
+				}
+				deleteTr();
+				selectBox();
+			})();
+				
+			</script>
+		</div>
+	</div>
+</body>
+</html>

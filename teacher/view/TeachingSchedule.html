@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>TeachingSchedule</title>
+	<link rel="stylesheet" href="styles/reset.css">
+	<link rel="stylesheet" href="styles/global.css">
+</head>
+<body>
+	<div id="main">
+		<div id="article" style="position:relative;">
+			<style type="text/css">
+				/*全局及step样式*/
+				.schedule_con{
+					width:706px;
+					padding:0 57px 0 37px;
+				}
+				.select_header{
+					height:69px;
+					line-height:69px;
+				}
+				.select_header .step_title{
+					color:#0aa9fb;
+					font-size:12px;
+					letter-spacing:1px;
+					position:relative;
+					margin-right:28px;
+				}
+				.select_header .step_title i{
+					font-style:normal;
+					font-size:16px;
+				}
+				.select_header .step_title b{
+					font-style:normal;
+					position:absolute;
+					right:0;
+					bottom:-4px;
+					height:1px;
+					width:20px;
+					background:#0fa6ef;
+				}
+				.select_header .date{
+					font-size:18px;
+					background:url(images/icons/date.png) no-repeat 0 4px;
+					padding-left:30px;
+				}
+				.datelist{
+					padding:0;
+				}
+				.datelist li{
+					float:left;
+					width:88px;
+					height:50px;
+					margin-right:10px;
+					margin-bottom:10px;
+					border:1px solid #f0f0f0;
+					cursor:pointer;
+				}
+				.datelist .choice{
+					border:1px solid #23b3ef;
+					background:url(images/icons/selectbg.png) no-repeat right bottom;
+				}
+				.datelist li p{
+					font-size:12px;
+					text-align: center;
+					margin:5px auto;
+				}
+				.datelist li span{
+					font-size:10px;
+					color:#8b8b8b;
+					display:block;
+					text-align:center;
+					margin:5px auto;
+				}
+				
+				.schedule_con hr{
+					height:0;
+					border:1px solid #efefef;
+				}
+				
+				/*step2样式*/
+				.select_header .time{
+					font-size:18px;
+					background:url(images/icons/time.png) no-repeat 0 4px;
+					padding-left:30px;
+				}
+				.select_time .data_con{
+					position:relative;
+				}
+				.select_time .data_con .datalist{
+					padding:0;
+					color:#757575;
+					font-size:12px;
+				}
+				.select_time .data_con .datalist .timecon{
+					height:36px;
+					line-height:36px;
+					margin:10px 0;
+				}
+				.select_time .data_con .datalist .timecon span{
+					float:left;
+				}
+				.select_time .data_con .datalist .timelist{
+					float:left;
+					padding-left:34px;
+					padding-right:34px;
+					margin-left:12px;
+					border:1px solid #ccc;
+					border-radius:17px;
+					background:#fafafa;
+				}
+				.select_time .data_con .datalist .timecon .timelist li{
+					float:left;
+					padding:0 7px;
+					cursor:pointer;
+				}
+				.select_time .data_con .datalist .timecon .timelist .blue{
+					color:#5dcbfe;
+				}
+				.select_time .data_con .datalist .timecon .timelist .green{
+					color:#39b097;
+				}
+				.select_time .data_con .datalist .timecon .timelist .locked{
+					background:url(images/icons/timebg.png) no-repeat 0 6px;
+					background-size:100% 70%;
+				}
+				/*save样式*/
+				.select_time .save{
+					width: 55px;
+					height:22px;
+					line-height:22px;
+					color:#fefefe;
+					font-size:12px;
+					border-radius: 11px;
+					border:none;
+					background:#0fa6ee;
+					position:absolute;
+					bottom:-20px;
+					right:20px;
+					cursor:pointer;
+				}
+				.select_time .edit{
+					width: 55px;
+					height:22px;
+					line-height:20px;
+					color:#0fa6ee;
+					font-size:12px;
+					border-radius: 11px;
+					border:1px solid #0fa6ee;
+					background:#fefefe;
+					position:absolute;
+					bottom:-20px;
+					right:20px;
+					cursor:pointer;
+				}
+				/*tips样式*/
+				.tips{
+					margin-left:90px;
+					float:left;
+					font-size:12px;
+				}
+				.tips .tips_title{
+					line-height:24px;
+					background:url(images/icons/tips.png) no-repeat;
+					padding-left:30px;
+				}
+				.tips ul{
+					padding-left:20px;
+				}
+				.tips .grey{
+					color:#777;
+					list-style-image: url(images/icons/greypoint.png);
+				}
+				.tips .blue{
+					color:#777;
+					list-style-image: url(images/icons/bluepoint.png);
+				}
+				.tips .green{
+					color:#777;
+					list-style-image: url(images/icons/greenpoint.png);
+				}
+			</style>		
+
+			<div class="schedule_con">
+				<!--step1开始-->
+				<div class="select_date">
+					<div class="select_header">
+						<span class="step_title">STEP<i>1</i><b></b></span>
+						<span class="date">Select the Date</span>
+					</div>
+					<div class="data_con">
+						<ul class="datelist">
+							<li class="choice">
+								<p>Mon</p>
+								<span>2016-07-15</span>
+							</li>
+							<li>
+								<p>Mon</p>
+								<span>2016-07-15</span>
+							</li>
+							<li>
+								<p>Mon</p>
+								<span>2016-07-15</span>
+							</li>
+							<li>
+								<p>Mon</p>
+								<span>2016-07-15</span>
+							</li>
+							<li>
+								<p>Mon</p>
+								<span>2016-07-15</span>
+							</li>
+							<li>
+								<p>Mon</p>
+								<span>2016-07-15</span>
+							</li>
+							<li>
+								<p>Mon</p>
+								<span>2016-07-15</span>
+							</li>
+							<li>
+								<p>Mon</p>
+								<span>2016-07-15</span>
+							</li>
+							<li>
+								<p>Mon</p>
+								<span>2016-07-15</span>
+							</li>
+							<li>
+								<p>Mon</p>
+								<span>2016-07-15</span>
+							</li>
+							<li>
+								<p>Mon</p>
+								<span>2016-07-15</span>
+							</li>
+							<li>
+								<p>Mon</p>
+								<span>2016-07-15</span>
+							</li>
+							<li>
+								<p>Mon</p>
+								<span>2016-07-15</span>
+							</li>
+							<li>
+								<p>Mon</p>
+								<span>2016-07-15</span>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<!--step1结束-->
+				<hr />
+				<!--step2开始-->
+				<div class="select_time">
+					<div class="select_header">
+						<span class="step_title">STEP<i>2</i><b></b></span>
+						<span class="time">Select the Time</span>
+					</div>
+					<div class="data_con">
+						<ul class="datalist">
+							<li class="timecon">
+								<span>00:00~05:30</span>
+								<ul class="timelist">
+									<li class="blue">00:00</li>
+									<li>00:30</li>
+									<li class="locked green">01:00</li>
+									<li>01:30</li>
+									<li>02:00</li>
+									<li>02:30</li>
+									<li>03:00</li>
+									<li>03:30</li>
+									<li>04:00</li>
+									<li>04:30</li>
+									<li>05:00</li>
+									<li>05:30</li>
+								</ul>
+							</li>
+							<li class="timecon">
+								<span>06:00~11:30</span>
+								<ul class="timelist">
+									<li>06:00</li>
+									<li>06:30</li>
+									<li>07:00</li>
+									<li>07:30</li>
+									<li>08:00</li>
+									<li>08:30</li>
+									<li>09:00</li>
+									<li>09:30</li>
+									<li>10:00</li>
+									<li>10:30</li>
+									<li>11:00</li>
+									<li>11:30</li>
+								</ul>
+							</li>
+							<li class="timecon">
+								<span>12:00~17:30</span>
+								<ul class="timelist">
+									<li>12:00</li>
+									<li>12:30</li>
+									<li>13:00</li>
+									<li>13:30</li>
+									<li>14:00</li>
+									<li>14:30</li>
+									<li>15:00</li>
+									<li>15:30</li>
+									<li>16:00</li>
+									<li>16:30</li>
+									<li>17:00</li>
+									<li>17:30</li>
+								</ul>
+							</li>
+							<li class="timecon">
+								<span>18:00~23:30</span>
+								<ul class="timelist">
+									<li>18:00</li>
+									<li>18:30</li>
+									<li>19:00</li>
+									<li>19:30</li>
+									<li>20:00</li>
+									<li>20:30</li>
+									<li>21:00</li>
+									<li>21:30</li>
+									<li>22:00</li>
+									<li>22:30</li>
+									<li>23:00</li>
+									<li>23:30</li>
+								</ul>
+							</li>
+						</ul>
+						<input type="button" class="edit" value="Edit" id="edit"/>
+					</div>	
+				</div>
+				<!--step2结束-->
+				<!--tips开始-->
+				<div class="tips">
+					<p class="tips_title">Tips:</p>
+					<ul>
+						<li class="grey">Grey- Click to open your teaching hours</li>
+						<li class="blue">Blue- You are booked (cannot be changed)</li>
+						<li class="green">Green- Available teaching hours</li>
+					</ul>
+				</div>
+				<!--tips结束-->
+			</div>
+			<script type="text/javascript">
+				;(function(){
+					var oDateUl = document.querySelector('.datelist');
+					var aDateLi = oDateUl.getElementsByTagName('li');
+					var oEditBtn = document.getElementById('edit');
+					var aTimeUl = document.querySelectorAll('.timelist');
+					
+					setDate();
+					choiceDay();
+					
+					//教师选择上课时间，
+					oEditBtn.onclick = function(){
+						if(this.className=='edit'){
+							this.className = 'save';
+							this.value = 'Save';
+							//save状态给每个时间选项添加点击事件
+							for(var i = 0;i<aTimeUl.length;i++){
+								var aTimeLi = aTimeUl[i].getElementsByTagName('li');
+								aTimeUl[i].onclick = function(ev){
+									var oEvent = event||ev;
+									var obj = oEvent.srcElement||oEvent.target;
+									choiceTime(obj);
+								}
+//								for(var j = 0;j<aTimeLi.length;j++){
+//									;(function(index){
+//										aTimeLi[index].addEventListener('click',choiceTime,false);
+//									})(j);
+//								}
+							}
+						}else{
+							this.className = 'edit';
+							this.value = 'Edit';
+							//edit状态移除每个时间选项的点击事件
+							for(var i = 0;i<aTimeUl.length;i++){
+								var aTimeLi = aTimeUl[i].getElementsByTagName('li');
+								aTimeUl[i].onclick = function(ev){
+									var oEvent = event||ev;
+									var obj = oEvent.srcElement||oEvent.target;
+									obj.removeEventListener('click',choiceTime,false);
+								}
+//								for(var j = 0;j<aTimeLi.length;j++){
+//									;(function(index){
+//										aTimeLi[index].removeEventListener('click',choiceTime,false);
+//									})(j);
+//								}
+							}
+						}
+					};
+					//给选择上课时间用的时间监听函数，按钮edit状态时移除事件监听
+					function choiceTime(obj){
+						if(obj.className==''){
+							obj.className = 'green';
+						}else if(obj.className=='green'){
+							obj.className = '';
+						}
+					}
+					
+					
+					//设置显示的日期时间
+					function setDate(){
+						for(var i = 0;i<aDateLi.length;i++){
+							var oDate = new Date();//后期改为服务器时间
+							oDate.setDate(oDate.getDate()+i);
+							var oP = aDateLi[i].getElementsByTagName('p')[0];
+							var oSpan = aDateLi[i].getElementsByTagName('span')[0];
+							oP.innerHTML = transDay(oDate.getDay());
+							oSpan.innerHTML = oDate.getFullYear()+'-'+toD(oDate.getMonth()+1)+'-'+toD(oDate.getDate());
+						}
+					}
+					//点击日期时更换样式
+					function choiceDay(){
+						for(var i = 0;i<aDateLi.length;i++){
+							;(function(index){
+								aDateLi[index].onclick = function(){
+									for(var i = 0;i<aDateLi.length;i++){
+										aDateLi[i].className = '';
+									}
+									this.className = 'choice';
+								};
+							})(i);
+						}
+					}
+					//日期补零
+					function toD(num){
+						return num>10?''+num:'0'+num;
+					}
+					//星期数字转为文字
+					function transDay(num){
+						switch(num){
+							case 0:return 'Sun';
+							case 1:return 'Mon';
+							case 2:return 'Tue';
+							case 3:return 'Wed';
+							case 4:return 'Thu';
+							case 5:return 'Fri';
+							case 6:return 'Sat';
+							default:return 'error';
+						}
+					}
+				})();
+			</script>
+		</div>
+	</div>
+</body>
+</html>

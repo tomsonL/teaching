@@ -1,0 +1,19 @@
+/* CSS file */
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+mx|Application
+{
+	fontSize: 12;
+	fontFamily: 微软雅黑;
+}
+
+mx|ToolTip
+{
+	font-family:            微软雅黑;
+	font-size:              12;
+	background-color:       #FFFFFF;
+	background-alpha:       1;
+	cornerRadius:           0;
+	borderStyle:			solid;
+	borderThickness:		2;
+}

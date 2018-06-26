@@ -1,0 +1,144 @@
+
+#main{
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+}
+
+#aside{
+	width: 280px;
+	height: 100%;
+	background-color: #ffffff;
+	border-right: 1px solid #cdcdcd;
+	overflow: hidden;
+	position: absolute;
+	/*float: left;*/
+	left: 0;
+	top: 0;
+}
+
+#content{
+	width: 100%;
+	height: 100%;
+	background-color: #f8f8f8;
+	min-width: 1200px;
+}
+
+.logo{
+	width: 108px;
+	height: 68px;
+	position: absolute;
+	left: 50%;
+	margin-left: -54px;
+	top:60px;
+}
+
+#userControl{
+	position: relative;
+	width: 100%;
+	height: 80px;
+}
+#userControl img{
+	position: absolute;
+	cursor: pointer;
+}
+#userControl #logout{
+	top:-24px;
+	left: 20px;
+}
+#userControl #alertMsg{
+	top:-24px;
+	right: 20px;
+}
+#userControl .touxiang{
+	width: 120px;
+	height: 120px;
+	top:-60px;
+	left: 50%;
+	margin-left: -60px;
+}
+#userControl strong{
+	display: block;
+	width: 16px;
+	height: 16px;
+	border-radius: 8px;
+	text-align: center;
+	position: absolute;
+	right: 18px;
+	top: -22px;
+	background-color: #FB6362;
+	font-size: 10px;
+	line-height: 16px;
+	color: #FFF;
+}
+.asideName{
+	font-size: 22px;
+	font-weight: bold;
+	text-align: center;
+	line-height: 30px;
+}
+.asideDate{
+	text-align: center;
+	height: 48px;
+	line-height: 24px;
+}
+.menu{
+	margin:0 auto;
+	margin-top: 20px;
+	width: 100%;
+	height: auto;
+
+}
+.menu li{
+	display: block;
+	padding:0 10px;
+	height: 40px;
+	text-align: left;
+	line-height: 40px;
+}
+.menu li div{
+	width: 190px;
+	margin:0 auto;
+}
+.menu li img{
+	display: inline-block;
+	vertical-align:middle;
+	margin-right: 10px;
+	width: 16px;
+	height: 16px;
+}
+.menu li.active,.menu li:hover{
+	cursor: pointer;
+	background-color: #01abe8;
+}
+.menu li.active a, .menu li:hover a{
+	color: #fff;
+}
+#con_title{
+	height: 60px;
+	background-color: #fff;
+	width: 100%;
+	border-bottom: 1px solid #e7e7e7;
+}
+#con_title .show_con{
+	margin-left: 320px;
+	height: 60px;
+	line-height: 60px;
+}
+#con_title .show_con .underLine{
+	padding:0 8px;
+	line-height: 30px;
+	border-bottom: 1px solid #0fa6ee;
+}
+#article{
+	width: 800px;
+	margin-left: 340px;
+	margin-top: 30px;
+	background-color: #fff;
+	padding-bottom: 10px;
+	overflow: hidden;
+	zoom: 1;
+}
+#layui-layer1{
+	width: 37px;
+}

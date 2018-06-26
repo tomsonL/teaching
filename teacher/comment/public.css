@@ -1,0 +1,253 @@
+*{
+	margin:0;
+	padding:0;
+}
+html,body{
+	width: 100%;
+	height:100%;
+	font-size: 14px;
+	font-family: '微软雅黑';
+}
+ul,li{
+	list-style: none;
+}
+
+/*公立校评价*/
+#publickEs{
+	display: none;
+}
+.es_content{
+	height: 440px;
+	margin:0 auto;
+	background-color: #fff;
+}
+.es_header ul{
+	width: 106%;
+	margin:10px auto;
+	overflow:hidden;
+	height: 36px;
+	line-height: 36px;
+}
+.es_header li{
+	float: left;
+	width: 33%;
+	text-align: center;
+}
+.es_bar{
+	width: 74%;
+	margin:0 auto;
+	height: 4px;
+	background-color: #eee;/*08bbf2*/
+}
+.es_bar p{
+	float: left;
+	width: 25%;
+	height: 100%;
+	position: relative;
+	z-index: 55;
+}
+.es_bar p.active{
+	background-color: #08bbf2;
+}
+.es_bar p.active span img{
+	display: inline-block;
+}
+.es_bar p span{
+	position: absolute;
+	width:26px;
+	height: 26px;
+	top:-11px;
+	border-radius: 50%;
+	background-color: #ddd;
+	line-height: 24px;
+	text-align: center;
+}
+.es_bar p span img{
+	width: 16px;
+	height: 16px;
+	vertical-align: middle;
+	display: none;
+}
+.es_bar p.es_p_middle span{
+	left:50%;
+	margin-left:-13px;
+}
+
+.es_bar p.active span.big{
+	
+}
+.es_bar p .es_bar_first{
+	margin-left: -10px;
+}
+.es_bar p.es_p_middle{
+	width: 50%;
+}
+.es_bar p .es_bar_last{
+	right:-10px;
+}
+.es_text{
+	padding:20px 0;
+	margin-top:20px;
+}
+.es_text ul{
+	height: 280px;
+	overflow-y: auto;
+}
+.es_text li{
+	padding:10px 0;
+	margin:10px 0;
+}
+.es_text_title{
+	text-align: center;
+	font-size: 20px;
+	font-weight: bold;
+}
+.es_text p{
+	height:auto;
+	line-height: 26px;
+}
+.es_text h4{
+	float: left;
+	width: 80px;
+	height: 24px;
+	line-height: 24px;
+	padding:0 14px;
+	margin-right: 16px;
+	background-color: #08bbf2;
+	text-align: center;
+	color:#fff;
+	border-radius:10px;
+
+}
+.es_text p.es_description{
+	float: left;
+	width: 60%;
+	line-height: 20px;
+}
+.es_text div{
+	overflow:hidden;
+}
+.es_text p.starBox{
+	float: right;
+	line-height: 20px;
+	margin-right: 14px;
+}
+.es_text p.starBox img{
+	width: 20px;
+	vertical-align: middle;
+	cursor: pointer;
+}
+.btnsBox{
+	margin:0 auto;
+	margin-top:20px;
+	text-align: center;
+	padding:5px;
+	overflow:hidden;
+
+}
+.btnsBox button.active{
+	color:#fff;
+	background-color: #08bbf2;
+}
+.btnsBox button{
+	height: 24px;
+	line-height: 24px;
+	border-radius:12px;
+	width: 70px;
+	border:1px solid #08bbf2;
+	cursor: pointer;
+	color:#08bbf2;
+	outline: none;
+	background-color: #fff;
+
+}
+
+.es_student,.es_teacher{
+	display: none;
+}
+.es_all textarea{
+	width: 400px;
+	padding:10px;
+	margin:0 auto;
+	display: block;
+	outline: none;
+	border:none;
+	min-height: 200px;
+	border-radius:8px;
+	background-color: #eee;
+	resize: none;
+	text-align: left;
+}
+
+
+/*公立校查看评价区*/
+.show_estimate{
+	display: none;
+}
+.show_es_text{
+	padding:20px 0;
+	height: 400px;
+	overflow-y: auto;
+}
+.show_es_text li{
+	padding:10px 0;
+	margin:10px 0;
+}
+.show_es_text h4.title{
+	margin:6px 0;
+	font-size: 18px;
+	font-weight: bold;
+}
+.show_es_text_title{
+	text-align: center;
+	font-size: 20px;
+	font-weight: bold;
+}
+.show_es_text p{
+	height:auto;
+	line-height: 26px;
+}
+.show_es_text p.es_description{
+	float: left;
+	width: 76%;
+}
+.show_es_text div{
+	overflow:hidden;
+}
+.show_es_text p.show_starBox{
+	float: right;
+	line-height: 22px;
+	margin-right: 14px;
+}
+.show_es_text p.show_starBox img{
+	width: 20px;
+	vertical-align: middle;
+	cursor: pointer;
+}
+.show_es_all textarea{
+	width: 480px;
+	padding:10px;
+	outline: none;
+	border:none;
+	min-height: 200px;
+	border-radius:8px;
+	background-color: #eee;
+	resize: none;
+	text-align: left;
+}
+.controls{
+	text-align: center;
+	margin-top:20px;
+}
+.controls button{
+	height: 30px;
+	line-height: 30px;
+	border-radius:15px;
+	width: 80px;
+	font-size: 18px;
+	border:1px solid #08bbf2;
+	cursor: pointer;
+	color:#fff;
+	outline: none;
+	background-color: #08bbf2;
+}

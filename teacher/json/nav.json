@@ -1,0 +1,26 @@
+{
+	"name":"menu",
+	"type":"left",
+	"items":[
+		{
+			"name":"Booking Calendar",
+			"url":"/teacher/view/bookingPage.html",
+			"icon":"/teacher/images/calendar.png"
+		},
+		{
+			"name":"Teaching Schedule",
+			"url":"/teacher/view/TeachingSchedule.html",
+			"icon":"/teacher/images/calendar2.png"
+		},
+		{
+			"name":"My Personal Page",
+			"url":"/teacher/view/MyPersonalPage.html",
+			"icon":"/teacher/images/user.png"
+		},
+		{
+			"name":"Teacher Regulations",
+			"url":"/teacher/view/TeacherRegulations.html",
+			"icon":"/teacher/images/file.png"
+		}
+	]
+}
